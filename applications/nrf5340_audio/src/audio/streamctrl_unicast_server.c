@@ -239,7 +239,8 @@ static void le_audio_msg_sub_thread(void)
 		case LE_AUDIO_EVT_PRES_DELAY_SET:
 			LOG_DBG("Set presentation delay");
 
-			ret = unicast_server_config_get(msg.conn, 0, NULL, NULL, &pres_delay_us);
+			ret = unicast_server_config_get(msg.conn, msg.dir, NULL, NULL,
+							&pres_delay_us);
 			if (ret) {
 				LOG_ERR("Failed to get config: %d", ret);
 				break;

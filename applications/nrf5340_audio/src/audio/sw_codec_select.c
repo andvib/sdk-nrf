@@ -15,10 +15,14 @@
 #include "sw_codec_lc3.h"
 #endif /* (CONFIG_SW_CODEC_LC3) */
 
+#include "sample_rate_converter.h"
+
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(sw_codec_select, CONFIG_SW_CODEC_SELECT_LOG_LEVEL);
 
 static struct sw_codec_config m_config;
+
+struct sample_rate_converter_ctx samplerater;
 
 int sw_codec_encode(void *pcm_data, size_t pcm_size, uint8_t **encoded_data, size_t *encoded_size)
 {
@@ -56,7 +60,8 @@ int sw_codec_encode(void *pcm_data, size_t pcm_size, uint8_t **encoded_data, siz
 		switch (m_config.encoder.num_ch) {
 		case SW_CODEC_MONO: {
 			/* Convert sample rate if needed */
-			ret = sample_rate_convert(
+			ret = sample_rate_converter_process(
+				&samplerater, SAMPLE_RATE_FILTER_SIMPLE,
 				pcm_data_mono_system_sample_rate[m_config.encoder.audio_ch],
 				pcm_block_size_mono_system_sample_rate, CONFIG_AUDIO_SAMPLE_RATE_HZ,
 				(void *)&pcm_data_mono[m_config.encoder.audio_ch],
@@ -76,24 +81,27 @@ int sw_codec_encode(void *pcm_data, size_t pcm_size, uint8_t **encoded_data, siz
 		}
 		case SW_CODEC_STEREO: {
 			/* Convert sample rate if needed */
-			ret = sample_rate_convert(
-				pcm_data_mono_system_sample_rate[AUDIO_CH_L],
+			ret = sample_rate_converter_process(
+				&samplerater, SAMPLE_RATE_FILTER_SIMPLE,
+				pcm_data_mono_system_sample_rate[m_config.encoder.audio_ch],
 				pcm_block_size_mono_system_sample_rate, CONFIG_AUDIO_SAMPLE_RATE_HZ,
-				(void *)&pcm_data_mono[AUDIO_CH_L], &pcm_block_size_mono,
-				m_config.encoder.sample_rate_hz);
+				(void *)&pcm_data_mono[m_config.encoder.audio_ch],
+				&pcm_block_size_mono, m_config.encoder.sample_rate_hz);
 			if (ret) {
 				LOG_ERR("Sample rate conversion failed for left channel: %d", ret);
 			}
 
+			memset(pcm_data_mono[AUDIO_CH_R], 0, 480);
+
 			/* Convert sample rate if needed */
-			ret = sample_rate_convert(
+			/*ret = sample_rate_convert(
 				pcm_data_mono_system_sample_rate[AUDIO_CH_R],
 				pcm_block_size_mono_system_sample_rate, CONFIG_AUDIO_SAMPLE_RATE_HZ,
 				(void *)&pcm_data_mono[AUDIO_CH_R], &pcm_block_size_mono,
 				m_config.encoder.sample_rate_hz);
 			if (ret) {
 				LOG_ERR("Sample rate conversion failed for right channel: %d", ret);
-			}
+			}*/
 
 			ret = sw_codec_lc3_enc_run(pcm_data_mono[AUDIO_CH_L], pcm_block_size_mono,
 						   LC3_USE_BITRATE_FROM_INIT, AUDIO_CH_L,
@@ -171,11 +179,14 @@ int sw_codec_decode(uint8_t const *const encoded_data, size_t encoded_size, bool
 				}
 
 				/* Convert sample rate if needed */
-				ret = sample_rate_convert(pcm_data_mono, pcm_size_session,
-							  m_config.decoder.sample_rate_hz,
-							  (void *)&pcm_data_mono_system_sample_rate,
-							  &pcm_size_system_sample_rate,
-							  CONFIG_AUDIO_SAMPLE_RATE_HZ);
+				ret = sample_rate_converter_process(
+					&samplerater, SAMPLE_RATE_FILTER_SIMPLE,
+					pcm_data_mono_system_sample_rate[m_config.encoder.audio_ch],
+					m_config.decoder.sample_rate_hz,
+					CONFIG_AUDIO_SAMPLE_RATE_HZ,
+					(void *)&pcm_data_mono[m_config.encoder.audio_ch],
+					&pcm_size_system_sample_rate,
+					m_config.encoder.sample_rate_hz);
 				if (ret) {
 					LOG_ERR("Sample rate conversion failed: %d", ret);
 				}
@@ -210,11 +221,14 @@ int sw_codec_decode(uint8_t const *const encoded_data, size_t encoded_size, bool
 				}
 
 				/* Convert sample rate if needed */
-				ret = sample_rate_convert(pcm_data_mono, pcm_size_session,
-							  m_config.decoder.sample_rate_hz,
-							  (void *)&pcm_data_mono_system_sample_rate,
-							  &pcm_size_system_sample_rate,
-							  CONFIG_AUDIO_SAMPLE_RATE_HZ);
+				ret = sample_rate_converter_process(
+					&samplerater, SAMPLE_RATE_FILTER_SIMPLE,
+					pcm_data_mono_system_sample_rate[m_config.encoder.audio_ch],
+					m_config.decoder.sample_rate_hz,
+					CONFIG_AUDIO_SAMPLE_RATE_HZ,
+					(void *)&pcm_data_mono[m_config.encoder.audio_ch],
+					&pcm_size_system_sample_rate,
+					m_config.encoder.sample_rate_hz);
 				if (ret) {
 					LOG_ERR("Sample rate conversion failed for left channel: "
 						"%d",
@@ -231,7 +245,7 @@ int sw_codec_decode(uint8_t const *const encoded_data, size_t encoded_size, bool
 				}
 
 				/* Convert sample rate if needed */
-				ret = sample_rate_convert(
+				/*ret = sample_rate_convert(
 					pcm_data_mono_right, pcm_size_session,
 					m_config.decoder.sample_rate_hz,
 					(void *)&pcm_data_mono_right_system_sample_rate,
@@ -240,7 +254,7 @@ int sw_codec_decode(uint8_t const *const encoded_data, size_t encoded_size, bool
 					LOG_ERR("Sample rate conversion failed for right channel: "
 						"%d",
 						ret);
-				}
+				}*/
 			}
 
 			ret = pscm_combine(pcm_data_mono_system_sample_rate,
