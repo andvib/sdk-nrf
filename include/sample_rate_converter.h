@@ -51,6 +51,6 @@ struct sample_rate_converter_ctx {
 int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 				  enum sample_rate_converter_filter filter, void *input,
 				  size_t input_size, uint32_t input_sample_rate, void *output,
-				  size_t *output_size, uint32_t output_sample_rate);
+				  size_t output_size, uint32_t output_sample_rate);
 
 #endif /* __ SAMPLE_RATE_CONVERTER__ */
