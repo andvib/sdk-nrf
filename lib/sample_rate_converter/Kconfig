@@ -11,7 +11,8 @@ config SAMPLE_RATE_CONVERTER
 	select TIMING_FUNCTIONS
 	help
 	  Enable the sample rate conversion library. The library uses CMSIS DSP filters to
-	  preserve quality during the conversion. 16k, 24k and 48k are supported.
+	  preserve quality during the conversion. Conversion between 16kHz, 24kHz and 48kHz
+	  frequencies are supported.
 
 if SAMPLE_RATE_CONVERTER
 module = SAMPLE_RATE_CONVERTER
@@ -38,7 +39,7 @@ config SAMPLE_RATE_CONVERTER_MAX_FILTER_SIZE
 	  The maximum number of filter taps the sample rate converter supports. Increasing this
 	  number will increase the memory usage of the converter.
 
-config SAMPLE_RATE_CONVERTER_BLOCK_SIZE
+config SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX
 	int "Number of samples per conversion call"
 	default 480
 	help

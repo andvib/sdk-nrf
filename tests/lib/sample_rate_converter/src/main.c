@@ -39,9 +39,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_decimate_24khz_16bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -85,9 +85,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_decimate_16khz_16bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -129,9 +129,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_24khz_16bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -179,9 +179,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
-		      "Input sample rate not as expected %d", conv_ctx.input_sample_rate);
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
+		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -210,9 +210,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
-		      "Input sample rate not as expected %d", conv_ctx.input_sample_rate);
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
+		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -244,9 +244,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
-		      "Input sample rate not as expected %d", conv_ctx.input_sample_rate);
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
+		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -278,9 +278,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
-		      "Input sample rate not as expected %d", conv_ctx.input_sample_rate);
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
+		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -328,9 +328,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_decimate_24khz_32bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -374,9 +374,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_decimate_16khz_32bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -419,9 +419,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_24khz_32bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -468,9 +468,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_32bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
-		      "Input sample rate not as expected %d", conv_ctx.input_sample_rate);
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
+		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -500,9 +500,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_32bit)
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
-		      "Input sample rate not as expected %d", conv_ctx.input_sample_rate);
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
+		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -533,9 +533,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_32bit)
 		output_samples, expected_output_samples, &output_written, output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
-		      "Input sample rate not as expected %d", conv_ctx.input_sample_rate);
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
+		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -566,9 +566,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_32bit)
 		output_samples, expected_output_samples, &output_written, output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
-		      "Input sample rate not as expected %d", conv_ctx.input_sample_rate);
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
+		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -612,8 +612,8 @@ ZTEST(suite_sample_rate_converter, test_init_valid_sample_rates_changed)
 	uint16_t output_bytes[expected_output_samples];
 	size_t output_written;
 
-	conv_ctx.input_sample_rate = original_input_rate;
-	conv_ctx.output_sample_rate = original_output_rate;
+	conv_ctx.sample_rate_input = original_input_rate;
+	conv_ctx.sample_rate_output = original_output_rate;
 
 	ret = sample_rate_converter_process(
 		&conv_ctx, filter, input_samples, num_samples * sizeof(uint16_t), new_input_rate,
@@ -621,9 +621,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_sample_rates_changed)
 		new_output_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, new_input_rate,
+	zassert_equal(conv_ctx.sample_rate_input, new_input_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, new_output_rate,
+	zassert_equal(conv_ctx.sample_rate_output, new_output_rate,
 		      "Output sample rate not as expected");
 }
 
@@ -721,8 +721,8 @@ ZTEST(suite_sample_rate_converter, test_init_valid_filter_changed)
 	enum sample_rate_converter_filter original_filter = SAMPLE_RATE_FILTER_SMALL;
 	enum sample_rate_converter_filter new_filter = SAMPLE_RATE_FILTER_SIMPLE;
 
-	conv_ctx.input_sample_rate = input_sample_rate;
-	conv_ctx.output_sample_rate = output_sample_rate;
+	conv_ctx.sample_rate_input = input_sample_rate;
+	conv_ctx.sample_rate_output = output_sample_rate;
 	conv_ctx.filter_type = original_filter;
 
 	ret = sample_rate_converter_process(
@@ -731,9 +731,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_filter_changed)
 		&output_written, output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.filter_type, new_filter, "Filter set incorrectly");
 }
@@ -839,9 +839,9 @@ ZTEST(suite_sample_rate_converter, test_valid_process_zero_size_input)
 					    &output_written, output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -878,9 +878,9 @@ ZTEST(suite_sample_rate_converter, test_valid_process_input_one_sample_interpola
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -920,9 +920,9 @@ ZTEST(suite_sample_rate_converter, test_valid_process_input_two_samples_decimate
 		output_sample_rate);
 
 	zassert_equal(ret, 0, "Sample rate conversion process failed");
-	zassert_equal(conv_ctx.input_sample_rate, input_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_input, input_sample_rate,
 		      "Input sample rate not as expected");
-	zassert_equal(conv_ctx.output_sample_rate, output_sample_rate,
+	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
 	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
 		      "Conversion ratio not as expected");
@@ -985,6 +985,10 @@ ZTEST(suite_sample_rate_converter, test_invalid_process_input_not_multiple)
 		      "16- or 32-bit multiple");
 }
 
+/* Number of samples must be a define so the large array becomes a fixed size array that can be
+ * initialized to all 0's
+ */
+#define INPUT_ARRAY_TOO_LARGE_NUM_SAMPLES 500
 ZTEST(suite_sample_rate_converter, test_invalid_process_input_array_too_large)
 {
 	int ret;
@@ -993,16 +997,16 @@ ZTEST(suite_sample_rate_converter, test_invalid_process_input_array_too_large)
 	uint32_t output_sample_rate = 24000;
 	uint32_t conversion_ratio = input_sample_rate / output_sample_rate;
 
-	size_t num_samples = 500;
-	uint16_t input_samples[num_samples];
-	size_t expected_output_samples = num_samples / conversion_ratio;
+	uint16_t input_samples[INPUT_ARRAY_TOO_LARGE_NUM_SAMPLES] = {0};
+	size_t expected_output_samples = INPUT_ARRAY_TOO_LARGE_NUM_SAMPLES / conversion_ratio;
 	uint16_t output_samples[expected_output_samples];
 
 	enum sample_rate_converter_filter filter = SAMPLE_RATE_FILTER_SIMPLE;
 	size_t output_written;
 
 	ret = sample_rate_converter_process(
-		&conv_ctx, filter, input_samples, num_samples * sizeof(uint16_t), input_sample_rate,
+		&conv_ctx, filter, input_samples,
+		INPUT_ARRAY_TOO_LARGE_NUM_SAMPLES * sizeof(uint16_t), input_sample_rate,
 		output_samples, expected_output_samples, &output_written, output_sample_rate);
 
 	zassert_equal(
@@ -1036,6 +1040,10 @@ ZTEST(suite_sample_rate_converter, test_invalid_process_output_buf_too_small)
 		      "Sample rate conversion process did not fail when output buffer is to small");
 }
 
+/* Number of samples must be a define so the large array becomes a fixed size array that can be
+ * initialized to all 0's
+ */
+#define BYTES_PRODUCED_TOO_LARGE_FOR_INTERNAL_BUF_NUM_SAMPLES 300
 ZTEST(suite_sample_rate_converter, test_invalid_bytes_produced_too_large_for_internal_buf)
 {
 	int ret;
@@ -1044,18 +1052,19 @@ ZTEST(suite_sample_rate_converter, test_invalid_bytes_produced_too_large_for_int
 	uint32_t output_sample_rate = 48000;
 	uint32_t conversion_ratio = output_sample_rate / input_sample_rate;
 
-	size_t num_samples = 300;
-	uint16_t input_samples[num_samples];
-	size_t expected_output_samples = num_samples * conversion_ratio;
+	uint16_t input_samples[BYTES_PRODUCED_TOO_LARGE_FOR_INTERNAL_BUF_NUM_SAMPLES] = {0};
+	size_t expected_output_samples =
+		BYTES_PRODUCED_TOO_LARGE_FOR_INTERNAL_BUF_NUM_SAMPLES * conversion_ratio;
 	uint16_t output_samples[expected_output_samples];
 
 	enum sample_rate_converter_filter filter = SAMPLE_RATE_FILTER_SIMPLE;
 	size_t output_written;
 
 	ret = sample_rate_converter_process(
-		&conv_ctx, filter, input_samples, num_samples * sizeof(uint16_t), input_sample_rate,
-		output_samples, expected_output_samples * sizeof(uint16_t), &output_written,
-		output_sample_rate);
+		&conv_ctx, filter, input_samples,
+		BYTES_PRODUCED_TOO_LARGE_FOR_INTERNAL_BUF_NUM_SAMPLES * sizeof(uint16_t),
+		input_sample_rate, output_samples, expected_output_samples * sizeof(uint16_t),
+		&output_written, output_sample_rate);
 
 	zassert_equal(ret, -EINVAL,
 		      "Sample rate conversion did not fail when the number of produced output "

@@ -36,11 +36,12 @@
  * The equation for interpolation is used as size as this gives the largest number.
  */
 #define SAMPLE_RATE_CONVERTER_STATE_BUFFER_SIZE                                                    \
-	CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE + CONFIG_SAMPLE_RATE_CONVERTER_MAX_FILTER_SIZE - 1
+	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX +                                             \
+	 CONFIG_SAMPLE_RATE_CONVERTER_MAX_FILTER_SIZE - 1)
 
 /** Filter types supported by the sample rate converter */
 enum sample_rate_converter_filter {
-	SAMPLE_RATE_FILTER_SIMPLE,
+	SAMPLE_RATE_FILTER_SIMPLE = 1,
 	SAMPLE_RATE_FILTER_SMALL,
 };
 
@@ -59,18 +60,18 @@ enum sample_rate_converter_filter {
 
 #ifdef CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16
 #define SAMPLE_RATE_CONVERTER_INPUT_BUF_SIZE                                                       \
-	SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES * sizeof(uint16_t)
+	(SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES * sizeof(uint16_t))
 #define SAMPLE_RATE_CONVERTER_RINGBUF_SIZE                                                         \
-	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE +                                                 \
-	 SAMPLE_RATE_CONVERTER_OUTPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES) *                            \
-		sizeof(uint16_t)
+	((CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX +                                            \
+	  SAMPLE_RATE_CONVERTER_OUTPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES) *                           \
+	 sizeof(uint16_t))
 #elif CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_32
 #define SAMPLE_RATE_CONVERTER_INPUT_BUF_SIZE                                                       \
-	SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES * sizeof(uint32_t)
+	(SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES * sizeof(uint32_t))
 #define SAMPLE_RATE_CONVERTER_RINGBUF_SIZE                                                         \
-	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE +                                                 \
-	 SAMPLE_RATE_CONVERTER_OUTPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES) *                            \
-		sizeof(uint32_t)
+	((CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX +                                            \
+	  SAMPLE_RATE_CONVERTER_OUTPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES) *                           \
+	 sizeof(uint32_t))
 #endif
 
 /** Buffer used for storing input bytes to the sample rate converter */
@@ -80,15 +81,15 @@ struct buf_ctx {
 };
 
 enum sample_rate_converter_direction {
-	CONVERSION_DIR_UP,
+	CONVERSION_DIR_UP = 1,
 	CONVERSION_DIR_DOWN,
 };
 
 /** Context for the sample rate conversion */
 struct sample_rate_converter_ctx {
 	/* Input and out sample rate to be used for the conversion. */
-	int input_sample_rate;
-	int output_sample_rate;
+	uint32_t sample_rate_input;
+	uint32_t sample_rate_output;
 
 	/* The ratio and direction for the current conversion. */
 	uint8_t conversion_ratio;
@@ -141,7 +142,7 @@ struct sample_rate_converter_ctx {
 int sample_rate_converter_open(struct sample_rate_converter_ctx *ctx);
 
 /**
- * @brief	Process input samples and produce output samples with new samplerate.
+ * @brief	Process input samples and produce output samples with new sample rate.
  *
  * @details	Takes samples with the input sample rate, and converts them to the new requested
  *		sample rate by filtering the samples before adding or removing samples. The context
@@ -167,8 +168,8 @@ int sample_rate_converter_open(struct sample_rate_converter_ctx *ctx);
  *			space to store bytes.
  */
 int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
-				  enum sample_rate_converter_filter filter, void *input,
-				  size_t input_size, uint32_t input_sample_rate, void *output,
+				  enum sample_rate_converter_filter filter, void const *const input,
+				  size_t input_size, uint32_t input_sample_rate, void *const output,
 				  size_t output_size, size_t *output_written,
 				  uint32_t output_sample_rate);
 

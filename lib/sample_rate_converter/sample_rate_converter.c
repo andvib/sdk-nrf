@@ -14,52 +14,51 @@
 LOG_MODULE_REGISTER(sample_rate_converter, CONFIG_SAMPLE_RATE_CONVERTER_LOG_LEVEL);
 
 /**
- * The input buffer must be able to store maximum two samples in addition to the block size to meet
+ * The input buffer must be able to store two samples in addition to the block size to meet
  * filter requirements.
  */
-#define SAMPLE_RATE_CONVERTER_INPUT_BUF_NUMBER_SAMPLES
 #define INTERNAL_INPUT_BUF_NUMBER_SAMPLES                                                          \
-	CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE +                                                  \
-		SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES
+	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX +                                             \
+	 SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES)
 
 #ifdef CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16
 #define SAMPLE_RATE_CONVERTER_INTERNAL_INPUT_BUF_SIZE                                              \
-	INTERNAL_INPUT_BUF_NUMBER_SAMPLES * sizeof(uint16_t)
+	(INTERNAL_INPUT_BUF_NUMBER_SAMPLES * sizeof(uint16_t))
 #define SAMLPE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE                                             \
-	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE * sizeof(uint16_t))
+	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX * sizeof(uint16_t))
 #elif CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_32
 #define SAMPLE_RATE_CONVERTER_INTERNAL_INPUT_BUF_SIZE                                              \
-	INTERNAL_INPUT_BUF_NUMBER_SAMPLES * sizeof(uint32_t)
+	(INTERNAL_INPUT_BUF_NUMBER_SAMPLES * sizeof(uint32_t))
 #define SAMLPE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE                                             \
-	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE * sizeof(uint32_t))
+	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX * sizeof(uint32_t))
 #endif
 
-static int validate_sample_rates(uint32_t input_sample_rate, uint32_t output_sample_rate)
+static int validate_sample_rates(uint32_t sample_rate_input, uint32_t sample_rate_output)
 {
-	if (input_sample_rate > output_sample_rate) {
-		if (input_sample_rate != 48000) {
-			LOG_ERR("Invalid input sample rate for downsampling %d", input_sample_rate);
+	if (sample_rate_input > sample_rate_output) {
+		if (sample_rate_input != 48000) {
+			LOG_ERR("Invalid input sample rate for downsampling %d", sample_rate_input);
 			return -EINVAL;
 		}
 
-		if ((output_sample_rate != 24000) && (output_sample_rate != 16000)) {
+		if ((sample_rate_output != 24000) && (sample_rate_output != 16000)) {
 			LOG_ERR("Invalid output sample rate for downsampling %d",
-				output_sample_rate);
+				sample_rate_output);
 			return -EINVAL;
 		}
-	} else if (input_sample_rate < output_sample_rate) {
-		if (output_sample_rate != 48000) {
+	} else if (sample_rate_input < sample_rate_output) {
+		if (sample_rate_output != 48000) {
 			LOG_ERR("Invalid output sample rate for upsampling: %d",
-				output_sample_rate);
+				sample_rate_output);
 			return -EINVAL;
 		}
 
-		if ((input_sample_rate != 24000) && (input_sample_rate != 16000)) {
-			LOG_ERR("Invalid input sample rate for upsampling: %d", input_sample_rate);
+		if ((sample_rate_input != 24000) && (sample_rate_input != 16000)) {
+			LOG_ERR("Invalid input sample rate for upsampling: %d", sample_rate_input);
 			return -EINVAL;
 		}
 	} else {
-		LOG_ERR("Input and out samplerates are the same");
+		LOG_ERR("Input and out sample rates are the same");
 		return -EINVAL;
 	}
 	return 0;
@@ -76,13 +75,13 @@ static inline bool conversion_needs_buffering(struct sample_rate_converter_ctx *
 	return ((ctx->conversion_direction == CONVERSION_DIR_UP) && (conversion_ratio == 3));
 }
 
-static inline uint8_t calculate_conversion_ratio(uint32_t input_sample_rate,
-						 uint32_t output_sample_rate)
+static inline uint8_t calculate_conversion_ratio(uint32_t sample_rate_input,
+						 uint32_t sample_rate_output)
 {
-	if (input_sample_rate > output_sample_rate) {
-		return input_sample_rate / output_sample_rate;
+	if (sample_rate_input > sample_rate_output) {
+		return sample_rate_input / sample_rate_output;
 	} else {
-		return output_sample_rate / input_sample_rate;
+		return sample_rate_output / sample_rate_input;
 	}
 }
 
@@ -94,16 +93,16 @@ static inline uint8_t calculate_conversion_ratio(uint32_t input_sample_rate,
  *	    ensure there will always be enough samples for a valid conversion.
  *
  * @param[in,out]	ctx			Pointer to the sample rate conversion context.
- * @param[in]		input_sample_rate	Sample rate of the input samples.
- * @param[in]		output_sample_rate	Sample rate of the output samples.
+ * @param[in]		sample_rate_input	Sample rate of the input samples.
+ * @param[in]		sample_rate_output	Sample rate of the output samples.
  * @param[in]		filter			Filter type to use in the conversion.
  *
  * @retval 0 On success.
  * @retval -EINVAL Invalid parameters used to initialize the conversion.
  */
 static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *ctx,
-					     uint32_t input_sample_rate,
-					     uint32_t output_sample_rate,
+					     uint32_t sample_rate_input,
+					     uint32_t sample_rate_output,
 					     enum sample_rate_converter_filter filter)
 {
 	int ret;
@@ -113,18 +112,18 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 
 	__ASSERT(ctx != NULL, "Context cannot be NULL");
 
-	ret = validate_sample_rates(input_sample_rate, output_sample_rate);
+	ret = validate_sample_rates(sample_rate_input, sample_rate_output);
 	if (ret) {
 		LOG_ERR("Invalid sample rate given (%d)", ret);
 		return ret;
 	}
 
-	ctx->input_sample_rate = input_sample_rate;
-	ctx->output_sample_rate = output_sample_rate;
+	ctx->sample_rate_input = sample_rate_input;
+	ctx->sample_rate_output = sample_rate_output;
 
-	ctx->conversion_ratio = calculate_conversion_ratio(input_sample_rate, output_sample_rate);
+	ctx->conversion_ratio = calculate_conversion_ratio(sample_rate_input, sample_rate_output);
 	ctx->conversion_direction =
-		(input_sample_rate < output_sample_rate) ? CONVERSION_DIR_UP : CONVERSION_DIR_DOWN;
+		(sample_rate_input < sample_rate_output) ? CONVERSION_DIR_UP : CONVERSION_DIR_DOWN;
 
 	ctx->filter_type = filter;
 	ret = sample_rate_converter_filter_get(filter, ctx->conversion_ratio,
@@ -139,15 +138,15 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 
 	if (conversion_needs_buffering(ctx, ctx->conversion_ratio)) {
 		LOG_DBG("Conversion needs buffering, start with the input buffer filled");
-#ifdef CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16
-		ctx->input_buf.bytes_in_buf =
-			SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES *
-			sizeof(uint16_t);
-#elif CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_32
-		ctx->input_buf.bytes_in_buf =
-			SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES *
-			sizeof(uint32_t);
-#endif
+		if (IS_ENABLED(CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16)) {
+			ctx->input_buf.bytes_in_buf =
+				SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES *
+				sizeof(uint16_t);
+		} else if (IS_ENABLED(CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_32)) {
+			ctx->input_buf.bytes_in_buf =
+				SAMPLE_RATE_CONVERTER_INPUT_BUFFER_NUMBER_OVERFLOW_SAMPLES *
+				sizeof(uint32_t);
+		}
 		memset(ctx->input_buf.buf, 0, ctx->input_buf.bytes_in_buf);
 	} else {
 		ctx->input_buf.bytes_in_buf = 0;
@@ -162,25 +161,25 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 		arm_err = arm_fir_interpolate_init_q15(&ctx->fir_interpolate_q15,
 						       ctx->conversion_ratio, filter_size,
 						       (q15_t *)filter_coeffs, ctx->state_buf_15,
-						       CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE);
+						       CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX);
 
 	} else {
 		arm_err = arm_fir_decimate_init_q15(&ctx->fir_decimate_q15, filter_size,
 						    ctx->conversion_ratio, (q15_t *)filter_coeffs,
 						    ctx->state_buf_15,
-						    CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE);
+						    CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX);
 	}
 #elif CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_32
 	if (ctx->conversion_direction == CONVERSION_DIR_UP) {
 		arm_err = arm_fir_interpolate_init_q31(&ctx->fir_interpolate_q31,
 						       ctx->conversion_ratio, filter_size,
 						       (q31_t *)filter_coeffs, ctx->state_buf_31,
-						       CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE);
+						       CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX);
 	} else {
 		arm_err = arm_fir_decimate_init_q31(&ctx->fir_decimate_q31, filter_size,
 						    ctx->conversion_ratio, (q31_t *)filter_coeffs,
 						    ctx->state_buf_31,
-						    CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE);
+						    CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX);
 	}
 #endif
 	if (arm_err == ARM_MATH_LENGTH_ERROR) {
@@ -191,9 +190,9 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 		return -EINVAL;
 	}
 
-	LOG_DBG("Sample rate converter initialized. Input sample rate: %d, Output sample rate: %d, "
+	LOG_INF("Sample rate converter initialized. Input sample rate: %d, Output sample rate: %d, "
 		"conversion ratio: %d, filter type: %d",
-		ctx->input_sample_rate, ctx->output_sample_rate, ctx->conversion_ratio,
+		ctx->sample_rate_input, ctx->sample_rate_output, ctx->conversion_ratio,
 		ctx->filter_type);
 	return 0;
 }
@@ -211,13 +210,13 @@ int sample_rate_converter_open(struct sample_rate_converter_ctx *ctx)
 }
 
 int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
-				  enum sample_rate_converter_filter filter, void *input,
-				  size_t input_size, uint32_t input_sample_rate, void *output,
+				  enum sample_rate_converter_filter filter, void const *const input,
+				  size_t input_size, uint32_t sample_rate_input, void *const output,
 				  size_t output_size, size_t *output_written,
-				  uint32_t output_sample_rate)
+				  uint32_t sample_rate_output)
 {
 	int ret;
-	uint8_t *read_ptr;
+	const uint8_t *read_ptr;
 	uint8_t *write_ptr;
 	size_t samples_to_process;
 
@@ -237,7 +236,7 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 
 	size_t samples_in = input_size / bytes_per_sample;
 
-	if (samples_in > CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE) {
+	if (samples_in > CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX) {
 		LOG_ERR("Too many samples given as input");
 		return -EINVAL;
 	}
@@ -247,10 +246,10 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 		return -EINVAL;
 	}
 
-	if ((ctx->input_sample_rate != input_sample_rate) ||
-	    (ctx->output_sample_rate != output_sample_rate) || (ctx->filter_type != filter)) {
+	if ((ctx->sample_rate_input != sample_rate_input) ||
+	    (ctx->sample_rate_output != sample_rate_output) || (ctx->filter_type != filter)) {
 		LOG_DBG("State has changed, re-initializing filter");
-		ret = sample_rate_converter_reconfigure(ctx, input_sample_rate, output_sample_rate,
+		ret = sample_rate_converter_reconfigure(ctx, sample_rate_input, sample_rate_output,
 							filter);
 		if (ret) {
 			LOG_ERR("Failed to initialize converter (%d)", ret);
@@ -284,11 +283,7 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 		return -EINVAL;
 	}
 
-	if (!conversion_needs_buffering(ctx, ctx->conversion_ratio)) {
-		write_ptr = output;
-		read_ptr = input;
-		samples_to_process = samples_in;
-	} else {
+	if (conversion_needs_buffering(ctx, ctx->conversion_ratio)) {
 		read_ptr = internal_input_buf;
 		write_ptr = internal_output_buf;
 
@@ -312,6 +307,10 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 		 */
 		memcpy(internal_input_buf, ctx->input_buf.buf, ctx->input_buf.bytes_in_buf);
 		memcpy(internal_input_buf + ctx->input_buf.bytes_in_buf, input, input_size);
+	} else {
+		write_ptr = output;
+		read_ptr = input;
+		samples_to_process = samples_in;
 	}
 
 #ifdef CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16
