@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-config SAMPLE_RATE_CONVERTER
+menuconfig SAMPLE_RATE_CONVERTER
 	bool "Sample Rate conversion library"
 	select CMSIS_DSP
 	select CMSIS_DSP_FILTERING
@@ -15,6 +15,7 @@ config SAMPLE_RATE_CONVERTER
 	  frequencies are supported.
 
 if SAMPLE_RATE_CONVERTER
+
 module = SAMPLE_RATE_CONVERTER
 module-str = Sample Rate Converter
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"

@@ -226,7 +226,8 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		      ring_buf_size_get(&conv_ctx.output_ringbuf));
 
 	uint16_t expected_input_buf_two[] = {8000};
-	zassert_mem_equal(conv_ctx.input_buf.buf, expected_input_buf_two, 1 * sizeof(uint16_t));
+	zassert_mem_equal(conv_ctx.input_buf.buf, expected_input_buf_two,
+			  sizeof(expected_input_buf_two));
 
 	zassert_equal(output_written, expected_output_samples * sizeof(uint16_t),
 		      "Output size was not as expected (%d)", output_written);
@@ -260,7 +261,8 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		      ring_buf_size_get(&conv_ctx.output_ringbuf));
 
 	uint16_t expected_input_buf_three[] = {11000, 12000};
-	zassert_mem_equal(conv_ctx.input_buf.buf, expected_input_buf_three, 2 * sizeof(uint16_t));
+	zassert_mem_equal(conv_ctx.input_buf.buf, expected_input_buf_three,
+			  sizeof(expected_input_buf_three));
 
 	zassert_equal(output_written, expected_output_samples * sizeof(uint16_t),
 		      "Output size was not as expected (%d)", output_written);
@@ -742,7 +744,7 @@ ZTEST(suite_sample_rate_converter, test_invalid_process_ctx_null_ptr)
 {
 	int ret;
 
-	uint16_t input_samples[] = {1000, 2000, 3000, 40000};
+	uint16_t input_samples[] = {1000, 2000, 3000, 4000};
 	size_t num_samples = ARRAY_SIZE(input_samples);
 	size_t expected_output_samples = num_samples / 3;
 	uint16_t output_samples[expected_output_samples];
@@ -763,7 +765,7 @@ ZTEST(suite_sample_rate_converter, test_invalid_process_buffer_null_ptr)
 {
 	int ret;
 
-	uint16_t input_samples[] = {1000, 2000, 3000, 40000};
+	uint16_t input_samples[] = {1000, 2000, 3000, 4000};
 	size_t num_samples = ARRAY_SIZE(input_samples);
 	size_t expected_output_samples = num_samples / 3;
 	uint16_t output_samples[expected_output_samples];
@@ -792,7 +794,7 @@ ZTEST(suite_sample_rate_converter, test_invalid_process_output_written_null_ptr)
 {
 	int ret;
 
-	uint16_t input_samples[] = {1000, 2000, 3000, 40000};
+	uint16_t input_samples[] = {1000, 2000, 3000, 4000};
 	size_t num_samples = ARRAY_SIZE(input_samples);
 	size_t expected_output_samples = num_samples / 3;
 	uint16_t output_samples[expected_output_samples];
@@ -823,7 +825,7 @@ ZTEST(suite_sample_rate_converter, test_valid_process_zero_size_input)
 {
 	int ret;
 
-	uint16_t input_samples[] = {1000, 2000, 3000, 40000};
+	uint16_t input_samples[] = {1000, 2000, 3000, 4000};
 	size_t num_samples = ARRAY_SIZE(input_samples);
 	size_t expected_output_samples = num_samples * 2;
 	uint16_t output_samples[expected_output_samples];
