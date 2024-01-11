@@ -60,6 +60,9 @@ int sample_rate_converter_filter_get(enum sample_rate_converter_filter filter_ty
 	__ASSERT(filter_ptr != NULL, "Filter pointer cannot be NULL");
 	__ASSERT(filter_size != NULL, "Filter size pointer cannot be NULL");
 
+	/* Filters only support conversion between 16kHz, 14kHz and 48kHz, which means that the
+	 * supported ratio is limited to 2 and 3.
+	 */
 	if ((conversion_ratio != 2) && (conversion_ratio != 3)) {
 		LOG_ERR("Invalid conversion ratio: %d", conversion_ratio);
 		return -EINVAL;
@@ -90,7 +93,7 @@ int sample_rate_converter_filter_get(enum sample_rate_converter_filter filter_ty
 		break;
 #endif /* CONFIG_SAMPLE_RATE_CONVERTER_FILTER_SMALL */
 	default:
-		LOG_ERR("No matching filter found\n");
+		LOG_ERR("No matching filter found");
 		return -EINVAL;
 	}
 #endif /* CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16 */
@@ -120,7 +123,7 @@ int sample_rate_converter_filter_get(enum sample_rate_converter_filter filter_ty
 		break;
 #endif /* CONFIG_SAMPLE_RATE_CONVERTER_FILTER_SMALL */
 	default:
-		LOG_ERR("No matching filter found\n");
+		LOG_ERR("No matching filter found");
 		return -EINVAL;
 	}
 #endif /* CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_32 */

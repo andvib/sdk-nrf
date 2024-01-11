@@ -19,8 +19,6 @@
  * @{
  */
 
-#include <zephyr/kernel.h>
-#include <zephyr/logging/log.h>
 #include <zephyr/sys/ring_buffer.h>
 #include <dsp/filtering_functions.h>
 
@@ -87,7 +85,7 @@ enum sample_rate_converter_direction {
 
 /** Context for the sample rate conversion */
 struct sample_rate_converter_ctx {
-	/* Input and out sample rate to be used for the conversion. */
+	/* Input and output sample rate to be used for the conversion. */
 	uint32_t sample_rate_input;
 	uint32_t sample_rate_output;
 

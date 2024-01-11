@@ -24,12 +24,12 @@ LOG_MODULE_REGISTER(sample_rate_converter, CONFIG_SAMPLE_RATE_CONVERTER_LOG_LEVE
 #ifdef CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16
 #define SAMPLE_RATE_CONVERTER_INTERNAL_INPUT_BUF_SIZE                                              \
 	(INTERNAL_INPUT_BUF_NUMBER_SAMPLES * sizeof(uint16_t))
-#define SAMLPE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE                                             \
+#define SAMPLE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE                                             \
 	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX * sizeof(uint16_t))
 #elif CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_32
 #define SAMPLE_RATE_CONVERTER_INTERNAL_INPUT_BUF_SIZE                                              \
 	(INTERNAL_INPUT_BUF_NUMBER_SAMPLES * sizeof(uint32_t))
-#define SAMLPE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE                                             \
+#define SAMPLE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE                                             \
 	(CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX * sizeof(uint32_t))
 #endif
 
@@ -131,7 +131,9 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 	if (ret) {
 		LOG_ERR("Failed to get filter (%d)", ret);
 		return ret;
-	} else if (filter_size > CONFIG_SAMPLE_RATE_CONVERTER_MAX_FILTER_SIZE) {
+	}
+
+	if (filter_size > CONFIG_SAMPLE_RATE_CONVERTER_MAX_FILTER_SIZE) {
 		LOG_ERR("Filter is larger than max size");
 		return -EINVAL;
 	}
@@ -190,7 +192,7 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 		return -EINVAL;
 	}
 
-	LOG_INF("Sample rate converter initialized. Input sample rate: %d, Output sample rate: %d, "
+	LOG_DBG("Sample rate converter initialized. Input sample rate: %d, Output sample rate: %d, "
 		"conversion ratio: %d, filter type: %d",
 		ctx->sample_rate_input, ctx->sample_rate_output, ctx->conversion_ratio,
 		ctx->filter_type);
@@ -221,7 +223,7 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 	size_t samples_to_process;
 
 	uint8_t internal_input_buf[SAMPLE_RATE_CONVERTER_INTERNAL_INPUT_BUF_SIZE];
-	uint8_t internal_output_buf[SAMLPE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE];
+	uint8_t internal_output_buf[SAMPLE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE];
 
 #if CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16
 	size_t bytes_per_sample = sizeof(uint16_t);
@@ -277,7 +279,7 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 		return -EINVAL;
 	}
 
-	if (*output_written > SAMLPE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE) {
+	if (*output_written > SAMPLE_RATE_CONVERTER_INTERNAL_OUTPUT_BUF_SIZE) {
 		LOG_ERR("Conversion process will produce more bytes than the internal output "
 			"buffer can hold");
 		return -EINVAL;

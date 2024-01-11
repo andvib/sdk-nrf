@@ -138,6 +138,7 @@ Kconfig*                                  @tejlmand
 /lib/pcm_mix/                             @koffes @alexsven @erikrobstad @rick1082 @gWacey
 /lib/pcm_stream_channel_modifier/         @koffes @alexsven @erikrobstad @rick1082 @gWacey
 /lib/tone/                                @koffes @alexsven @erikrobstad @rick1082 @gWacey
+/lib/sample_rate_converter/               @andvib @gWacey
 /modules/                                 @tejlmand
 /modules/hostap/                          @krish2718 @jukkar @rado17 @sachinthegreen @rlubos
 /modules/mcuboot/                         @de-nordic @nordicjm
