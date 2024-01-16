@@ -78,20 +78,16 @@ struct buf_ctx {
 	size_t bytes_in_buf;
 };
 
-enum sample_rate_converter_direction {
-	CONVERSION_DIR_UP = 1,
-	CONVERSION_DIR_DOWN,
-};
-
 /** Context for the sample rate conversion */
 struct sample_rate_converter_ctx {
 	/* Input and output sample rate to be used for the conversion. */
 	uint32_t sample_rate_input;
 	uint32_t sample_rate_output;
 
-	/* The ratio and direction for the current conversion. */
-	uint8_t conversion_ratio;
-	enum sample_rate_converter_direction conversion_direction;
+	/* The ratio for the current conversion. When the conversion is upsampling the ratio is
+	 * positive and negative when downsampling.
+	 */
+	int conversion_ratio;
 
 	/* Filter type to be used for the conversion. */
 	enum sample_rate_converter_filter filter_type;

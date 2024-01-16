@@ -34,11 +34,11 @@ config SAMPLE_RATE_CONVERTER_FILTER_SMALL
 	  capabilities.
 
 config SAMPLE_RATE_CONVERTER_MAX_FILTER_SIZE
-	int "Maximum number of filter taps the module supports"
-	default 34
+	int
+	default 34 if SAMPLE_RATE_CONVERTER_FILTER_SMALL
+	default 3 if SAMPLE_RATE_CONVERTER_FILTER_SIMPLE
 	help
-	  The maximum number of filter taps the sample rate converter supports. Increasing this
-	  number will increase the memory usage of the converter.
+	  The maximum number of filter taps the sample rate converter supports.
 
 config SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX
 	int "Number of samples per conversion call"

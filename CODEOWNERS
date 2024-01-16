@@ -296,6 +296,7 @@ Kconfig*                                  @tejlmand
 /tests/lib/pcm_mix/                       @koffes @alexsven @erikrobstad @rick1082 @gWacey
 /tests/lib/pcm_stream_channel_modifier/   @koffes @alexsven @erikrobstad @rick1082 @gWacey
 /tests/lib/tone/                          @koffes @alexsven @erikrobstad @rick1082 @gWacey
+/tests/lib/sample_rate_converter/         @andvib @gWacey
 /tests/modules/lib/zcbor/                 @oyvindronningstad
 /tests/modules/mcuboot/direct_xip/        @hakonfam
 /tests/modules/mcuboot/external_flash/    @hakonfam @sigvartmh

@@ -9,6 +9,7 @@
 
 #include <errno.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(sample_rate_converter, CONFIG_SAMPLE_RATE_CONVERTER_LOG_LEVEL);
@@ -64,22 +65,11 @@ static int validate_sample_rates(uint32_t sample_rate_input, uint32_t sample_rat
 	return 0;
 }
 
-/**
- * When upsampling from 16kHz to 48kHz the input and output bytes must be buffered. This is to
- * fulfill the requirement for the filter that the number of input bytes must be divisible by the
- * conversion factor. This function returns true when this is the case.
- */
-static inline bool conversion_needs_buffering(struct sample_rate_converter_ctx *ctx,
-					      uint8_t conversion_ratio)
-{
-	return ((ctx->conversion_direction == CONVERSION_DIR_UP) && (conversion_ratio == 3));
-}
-
-static inline uint8_t calculate_conversion_ratio(uint32_t sample_rate_input,
-						 uint32_t sample_rate_output)
+static inline int calculate_conversion_ratio(uint32_t sample_rate_input,
+					     uint32_t sample_rate_output)
 {
 	if (sample_rate_input > sample_rate_output) {
-		return sample_rate_input / sample_rate_output;
+		return -(sample_rate_input / sample_rate_output);
 	} else {
 		return sample_rate_output / sample_rate_input;
 	}
@@ -122,11 +112,9 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 	ctx->sample_rate_output = sample_rate_output;
 
 	ctx->conversion_ratio = calculate_conversion_ratio(sample_rate_input, sample_rate_output);
-	ctx->conversion_direction =
-		(sample_rate_input < sample_rate_output) ? CONVERSION_DIR_UP : CONVERSION_DIR_DOWN;
 
 	ctx->filter_type = filter;
-	ret = sample_rate_converter_filter_get(filter, ctx->conversion_ratio,
+	ret = sample_rate_converter_filter_get(filter, abs(ctx->conversion_ratio),
 					       (void **)&filter_coeffs, &filter_size);
 	if (ret) {
 		LOG_ERR("Failed to get filter (%d)", ret);
@@ -138,7 +126,7 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 		return -EINVAL;
 	}
 
-	if (conversion_needs_buffering(ctx, ctx->conversion_ratio)) {
+	if (ctx->conversion_ratio == 3) {
 		LOG_DBG("Conversion needs buffering, start with the input buffer filled");
 		if (IS_ENABLED(CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16)) {
 			ctx->input_buf.bytes_in_buf =
@@ -159,28 +147,28 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 		      ctx->output_ringbuf_data);
 
 #ifdef CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16
-	if (ctx->conversion_direction == CONVERSION_DIR_UP) {
+	if (ctx->conversion_ratio > 0) {
 		arm_err = arm_fir_interpolate_init_q15(&ctx->fir_interpolate_q15,
-						       ctx->conversion_ratio, filter_size,
+						       abs(ctx->conversion_ratio), filter_size,
 						       (q15_t *)filter_coeffs, ctx->state_buf_15,
 						       CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX);
 
 	} else {
 		arm_err = arm_fir_decimate_init_q15(&ctx->fir_decimate_q15, filter_size,
-						    ctx->conversion_ratio, (q15_t *)filter_coeffs,
-						    ctx->state_buf_15,
+						    abs(ctx->conversion_ratio),
+						    (q15_t *)filter_coeffs, ctx->state_buf_15,
 						    CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX);
 	}
 #elif CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_32
-	if (ctx->conversion_direction == CONVERSION_DIR_UP) {
+	if (ctx->conversion_ratio > 0) {
 		arm_err = arm_fir_interpolate_init_q31(&ctx->fir_interpolate_q31,
-						       ctx->conversion_ratio, filter_size,
+						       abs(ctx->conversion_ratio), filter_size,
 						       (q31_t *)filter_coeffs, ctx->state_buf_31,
 						       CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX);
 	} else {
 		arm_err = arm_fir_decimate_init_q31(&ctx->fir_decimate_q31, filter_size,
-						    ctx->conversion_ratio, (q31_t *)filter_coeffs,
-						    ctx->state_buf_31,
+						    abs(ctx->conversion_ratio),
+						    (q31_t *)filter_coeffs, ctx->state_buf_31,
 						    CONFIG_SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX);
 	}
 #endif
@@ -259,18 +247,17 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 		}
 	}
 
-	if ((ctx->conversion_direction == CONVERSION_DIR_DOWN) &&
-	    (samples_in < ctx->conversion_ratio)) {
+	if ((ctx->conversion_ratio < 0) && (samples_in < abs(ctx->conversion_ratio))) {
 		LOG_ERR("Number of samples in can not be less than the conversion ratio (%d) when "
 			"downsampling",
 			ctx->conversion_ratio);
 		return -EINVAL;
 	}
 
-	if (ctx->conversion_direction == CONVERSION_DIR_UP) {
+	if (ctx->conversion_ratio > 0) {
 		*output_written = input_size * ctx->conversion_ratio;
 	} else {
-		*output_written = input_size / ctx->conversion_ratio;
+		*output_written = input_size / abs(ctx->conversion_ratio);
 	}
 
 	if (*output_written > output_size) {
@@ -285,7 +272,7 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 		return -EINVAL;
 	}
 
-	if (conversion_needs_buffering(ctx, ctx->conversion_ratio)) {
+	if (ctx->conversion_ratio == 3) {
 		read_ptr = internal_input_buf;
 		write_ptr = internal_output_buf;
 
@@ -304,8 +291,8 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 			samples_to_process = samples_in - extra_samples;
 		}
 
-		/* Merge bytes in input buffer and incoming bytes into the internal buffer for
-		 * processing
+		/* Merge bytes in input buffer and incoming bytes into the internal buffer
+		 * for processing
 		 */
 		memcpy(internal_input_buf, ctx->input_buf.buf, ctx->input_buf.bytes_in_buf);
 		memcpy(internal_input_buf + ctx->input_buf.bytes_in_buf, input, input_size);
@@ -316,7 +303,7 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 	}
 
 #ifdef CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_16
-	if (ctx->conversion_direction == CONVERSION_DIR_UP) {
+	if (ctx->conversion_ratio > 0) {
 		arm_fir_interpolate_q15(&ctx->fir_interpolate_q15, (q15_t *)read_ptr,
 					(q15_t *)write_ptr, samples_to_process);
 	} else {
@@ -324,7 +311,7 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 				     samples_to_process);
 	}
 #elif CONFIG_SAMPLE_RATE_CONVERTER_BIT_DEPTH_32
-	if (ctx->conversion_direction == CONVERSION_DIR_UP) {
+	if (ctx->conversion_ratio > 0) {
 		arm_fir_interpolate_q31(&ctx->fir_interpolate_q31, (q31_t *)read_ptr,
 					(q31_t *)write_ptr, samples_to_process);
 	} else {
@@ -333,7 +320,7 @@ int sample_rate_converter_process(struct sample_rate_converter_ctx *ctx,
 	}
 #endif
 
-	if (!conversion_needs_buffering(ctx, ctx->conversion_ratio)) {
+	if (ctx->conversion_ratio != 3) {
 		/* Nothing needs to be done in output buffer */
 		return 0;
 	}

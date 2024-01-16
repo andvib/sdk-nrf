@@ -7,6 +7,7 @@
 #include <zephyr/ztest.h>
 #include <zephyr/tc_util.h>
 #include <sample_rate_converter.h>
+#include <stdlib.h>
 
 struct sample_rate_converter_ctx conv_ctx;
 
@@ -43,10 +44,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_decimate_24khz_16bit)
 		      "Input sample rate not as expected");
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_DOWN,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio < 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter not as expected");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0, "Bytes in input buffer not as expected");
 	zassert_equal(ring_buf_size_get(&conv_ctx.output_ringbuf), 0,
@@ -89,10 +89,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_decimate_16khz_16bit)
 		      "Input sample rate not as expected");
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_DOWN,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio < 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0, "Bytes in input buffer not as expected");
 	zassert_equal(ring_buf_size_get(&conv_ctx.output_ringbuf), 0,
@@ -133,10 +132,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_24khz_16bit)
 		      "Input sample rate not as expected");
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0, "Bytes in input buffer not as expected");
 	zassert_equal(ring_buf_size_get(&conv_ctx.output_ringbuf), 0,
@@ -183,10 +181,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0,
 		      "Bytes in input buffer not as expected %d", conv_ctx.input_buf.bytes_in_buf);
@@ -214,10 +211,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 2,
 		      "Bytes in input buffer not as expected %d", conv_ctx.input_buf.bytes_in_buf);
@@ -249,10 +245,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 4,
 		      "Bytes in input buffer not as expected %d", conv_ctx.input_buf.bytes_in_buf);
@@ -284,10 +279,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_16bit)
 		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0,
 		      "Bytes in input buffer not as expected %d", conv_ctx.input_buf.bytes_in_buf);
@@ -334,10 +328,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_decimate_24khz_32bit)
 		      "Input sample rate not as expected");
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_DOWN,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio < 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0, "Bytes in input buffer not as expected");
 	zassert_equal(ring_buf_size_get(&conv_ctx.output_ringbuf), 0,
@@ -380,10 +373,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_decimate_16khz_32bit)
 		      "Input sample rate not as expected");
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_DOWN,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio < 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0, "Bytes in input buffer not as expected");
 	zassert_equal(ring_buf_size_get(&conv_ctx.output_ringbuf), 0,
@@ -425,10 +417,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_24khz_32bit)
 		      "Input sample rate not as expected");
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0, "Bytes in input buffer not as expected");
 	zassert_equal(ring_buf_size_get(&conv_ctx.output_ringbuf), 0,
@@ -474,10 +465,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_32bit)
 		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0,
 		      "Bytes in input buffer not as expected (%d)",
@@ -506,10 +496,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_32bit)
 		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 4,
 		      "Bytes in input buffer not as expected %d", conv_ctx.input_buf.bytes_in_buf);
@@ -539,10 +528,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_32bit)
 		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 8,
 		      "Bytes in input buffer not as expected %d", conv_ctx.input_buf.bytes_in_buf);
@@ -572,10 +560,9 @@ ZTEST(suite_sample_rate_converter, test_init_valid_interpolate_16khz_32bit)
 		      "Input sample rate not as expected %d", conv_ctx.sample_rate_input);
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter set incorrectly");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0,
 		      "Bytes in input buffer not as expected %d", conv_ctx.input_buf.bytes_in_buf);
@@ -845,10 +832,9 @@ ZTEST(suite_sample_rate_converter, test_valid_process_zero_size_input)
 		      "Input sample rate not as expected");
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter not as expected");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0, "Bytes in input buffer not as expected");
 	zassert_equal(ring_buf_size_get(&conv_ctx.output_ringbuf), 0,
@@ -884,10 +870,9 @@ ZTEST(suite_sample_rate_converter, test_valid_process_input_one_sample_interpola
 		      "Input sample rate not as expected");
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_UP,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio > 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter not as expected");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0, "Bytes in input buffer not as expected");
 	zassert_equal(ring_buf_size_get(&conv_ctx.output_ringbuf), 0,
@@ -926,10 +911,9 @@ ZTEST(suite_sample_rate_converter, test_valid_process_input_two_samples_decimate
 		      "Input sample rate not as expected");
 	zassert_equal(conv_ctx.sample_rate_output, output_sample_rate,
 		      "Output sample rate not as expected");
-	zassert_equal(conv_ctx.conversion_ratio, conversion_ratio,
+	zassert_equal(abs(conv_ctx.conversion_ratio), conversion_ratio,
 		      "Conversion ratio not as expected");
-	zassert_equal(conv_ctx.conversion_direction, CONVERSION_DIR_DOWN,
-		      "Conversion direction is not as expected");
+	zassert_true(conv_ctx.conversion_ratio < 0, "Conversion direction is not as expected");
 	zassert_equal(conv_ctx.filter_type, filter, "Filter not as expected");
 	zassert_equal(conv_ctx.input_buf.bytes_in_buf, 0, "Bytes in input buffer not as expected");
 	zassert_equal(ring_buf_size_get(&conv_ctx.output_ringbuf), 0,
