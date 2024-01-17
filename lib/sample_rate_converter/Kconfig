@@ -20,11 +20,12 @@ module = SAMPLE_RATE_CONVERTER
 module-str = Sample Rate Converter
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
 
-config SAMPLE_RATE_CONVERTER_FILTER_SIMPLE
-	bool "Include the simple sample rate converter filters"
+config SAMPLE_RATE_CONVERTER_FILTER_TEST
+	bool "Include the test filters for the sample rate converter"
 	help
-	  Includes the simple filters for the sample rate converter. The simple filters uses the
-	  least amount of space and time for the conversion, at the expense of quality.
+	  Includes the test filters for the sample rate converter. These simple filters are
+	  intended to be used for unittests only, as they give predictable and easy to understand
+	  output.
 
 config SAMPLE_RATE_CONVERTER_FILTER_SMALL
 	bool "Include the small sample rate converter filters"

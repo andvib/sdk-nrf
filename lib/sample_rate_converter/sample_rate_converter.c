@@ -114,7 +114,7 @@ static int sample_rate_converter_reconfigure(struct sample_rate_converter_ctx *c
 	ctx->conversion_ratio = calculate_conversion_ratio(sample_rate_input, sample_rate_output);
 
 	ctx->filter_type = filter;
-	ret = sample_rate_converter_filter_get(filter, abs(ctx->conversion_ratio),
+	ret = sample_rate_converter_filter_get(filter, ctx->conversion_ratio,
 					       (void **)&filter_coeffs, &filter_size);
 	if (ret) {
 		LOG_ERR("Failed to get filter (%d)", ret);
