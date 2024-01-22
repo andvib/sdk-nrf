@@ -102,6 +102,20 @@ int main(void)
 		goto failure;
 	}
 
+	/* This takes shorter time - bug appears */
+	/*volatile int counter = 1000000;
+
+	for (int i = 0; i < 1; i++) {
+		counter++;
+	}*/
+
+	/* This takes longer time - bug doesn't appear */
+	volatile int counter = 1;
+
+	for (int i = 0; i < 1000000; i++) {
+		counter++;
+	}
+
 	bl_boot(fw_info_find(s0_addr));
 	return 0;
 
