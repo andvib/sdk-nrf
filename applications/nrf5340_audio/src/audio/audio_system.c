@@ -256,20 +256,28 @@ int audio_system_encode_test_tone_step(void)
 	return 0;
 }
 
-void audio_system_config_set(uint32_t encoder_sample_rate_hz, uint32_t encoder_bitrate,
-			     uint32_t decoder_sample_rate_hz)
+int audio_system_config_set(uint32_t encoder_sample_rate_hz, uint32_t encoder_bitrate,
+			    uint32_t decoder_sample_rate_hz)
 {
 	if (sample_rate_valid(encoder_sample_rate_hz)) {
 		sw_codec_cfg.encoder.sample_rate_hz = encoder_sample_rate_hz;
+	} else if (encoder_sample_rate_hz) {
+		LOG_ERR("%d is not a valid sample rate", encoder_sample_rate_hz);
+		return -EINVAL;
 	}
 
 	if (sample_rate_valid(decoder_sample_rate_hz)) {
 		sw_codec_cfg.decoder.sample_rate_hz = decoder_sample_rate_hz;
+	} else if (decoder_sample_rate_hz) {
+		LOG_ERR("%d is not a valid sample rate", decoder_sample_rate_hz);
+		return -EINVAL;
 	}
 
 	if (encoder_bitrate) {
 		sw_codec_cfg.encoder.bitrate = encoder_bitrate;
 	}
+
+	return 0;
 }
 
 /* This function is only used on gateway using USB as audio source and bidirectional stream */

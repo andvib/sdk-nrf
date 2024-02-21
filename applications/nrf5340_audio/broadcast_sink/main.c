@@ -232,9 +232,11 @@ static void le_audio_msg_sub_thread(void)
 			}
 
 			LOG_DBG("\tSampling rate: %d Hz", sampling_rate_hz);
-			LOG_DBG("\tBitrate: %d bps", bitrate_bps);
+			LOG_DBG("\tBitrate (compressed): %d bps", bitrate_bps);
 
-			audio_system_config_set(VALUE_NOT_SET, VALUE_NOT_SET, sampling_rate_hz);
+			ret = audio_system_config_set(VALUE_NOT_SET, VALUE_NOT_SET,
+						      sampling_rate_hz);
+			ERR_CHK(ret);
 
 			ret = audio_datapath_pres_delay_us_set(pres_delay_us);
 			if (ret) {

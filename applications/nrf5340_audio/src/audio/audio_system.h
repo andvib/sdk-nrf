@@ -51,12 +51,17 @@ int audio_system_encode_test_tone_step(void);
 /**
  * @brief	Set the sample rates for the encoder and decoder, and the bitrate for encoder.
  *
+ * @note	If any of the values are 0 that specific configuration will not be set.
+ *
  * @param[in]	encoder_sample_rate_hz	Sample rate to be used by the encoder, can be 0.
  * @param[in]	encoder_bitrate		Bitrate to be used by the encoder (bps), can be 0.
  * @param[in]	decoder_sample_rate_hz	Sample rate to be used by the decoder, can be 0.
+ *
+ * @retval	-EINVAL	Invalid sample rate given.
+ * @retval	0	On success.
  */
-void audio_system_config_set(uint32_t encoder_sample_rate_hz, uint32_t encoder_bitrate,
-			     uint32_t decoder_sample_rate_hz);
+int audio_system_config_set(uint32_t encoder_sample_rate_hz, uint32_t encoder_bitrate,
+			    uint32_t decoder_sample_rate_hz);
 
 /**
  * @brief	Decode data and then add it to TX FIFO buffer.

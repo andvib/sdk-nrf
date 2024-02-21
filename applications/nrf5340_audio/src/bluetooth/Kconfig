@@ -42,17 +42,17 @@ choice BT_AUDIO_PREF_SAMPLE_RATE
 config  BT_AUDIO_PREF_SAMPLE_RATE_48KHZ
 	bool "48 kHz"
 	help
-	  48000 Hz sample rate.
+	  48000 Hz preferred sample rate.
 
 config  BT_AUDIO_PREF_SAMPLE_RATE_24KHZ
 	bool "24 kHz"
 	help
-	  24000 Hz sample rate.
+	  24000 Hz preferred sample rate.
 
 config  BT_AUDIO_PREF_SAMPLE_RATE_16KHZ
 	bool "16 kHz"
 	help
-	  16000 Hz sample rate.
+	  16000 Hz preferred sample rate.
 endchoice
 
 #----------------------------------------------------------------------------#

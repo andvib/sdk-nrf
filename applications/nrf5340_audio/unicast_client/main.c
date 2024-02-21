@@ -268,14 +268,16 @@ static void le_audio_msg_sub_thread(void)
 			}
 
 			LOG_DBG("\tSampling rate: %d Hz", sampling_rate_hz);
-			LOG_DBG("\tBitrate: %d bps", bitrate_bps);
+			LOG_DBG("\tBitrate (compressed): %d bps", bitrate_bps);
 
 			if (msg.dir == BT_AUDIO_DIR_SINK) {
-				audio_system_config_set(sampling_rate_hz, bitrate_bps,
-							VALUE_NOT_SET);
+				ret = audio_system_config_set(sampling_rate_hz, bitrate_bps,
+							      VALUE_NOT_SET);
+				ERR_CHK(ret);
 			} else if (msg.dir == BT_AUDIO_DIR_SOURCE) {
-				audio_system_config_set(VALUE_NOT_SET, VALUE_NOT_SET,
-							sampling_rate_hz);
+				ret = audio_system_config_set(VALUE_NOT_SET, VALUE_NOT_SET,
+							      sampling_rate_hz);
+				ERR_CHK(ret);
 			}
 
 			break;

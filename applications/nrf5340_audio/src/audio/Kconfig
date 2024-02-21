@@ -43,7 +43,7 @@ config AUDIO_MAX_PRES_DLY_US
 	help
 	  The maximum presentation delay in micro seconds.
 
-choice AUDIO_SAMPLE_RATE
+choice AUDIO_SYSTEM_SAMPLE_RATE
 	prompt "System audio sample rate"
 	default AUDIO_SAMPLE_RATE_48000_HZ
 	help
@@ -90,7 +90,7 @@ endchoice
 
 config AUDIO_SAMPLE_RATE_CONVERSION
 	bool "Enable sample rate conversion"
-	default n
+	default y
 	select EXPERIMENTAL
 	select SAMPLE_RATE_CONVERTER
 	select SAMPLE_RATE_CONVERTER_FILTER_TEST
