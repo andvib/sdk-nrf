@@ -98,7 +98,20 @@ static le_audio_receive_cb receive_cb;
 static struct bt_bap_unicast_group *unicast_group;
 
 static struct bt_bap_lc3_preset lc3_preset_sink = BT_BAP_LC3_UNICAST_PRESET_NRF5340_AUDIO_SINK;
+static struct bt_bap_lc3_preset lc3_preset_sink_48_4_1 =
+	BT_BAP_LC3_UNICAST_PRESET_48_4_1(BT_AUDIO_LOCATION_ANY, (BT_AUDIO_CONTEXT_TYPE_MEDIA));
+static struct bt_bap_lc3_preset lc3_preset_sink_24_2_1 =
+	BT_BAP_LC3_UNICAST_PRESET_24_2_1(BT_AUDIO_LOCATION_ANY, (BT_AUDIO_CONTEXT_TYPE_MEDIA));
+static struct bt_bap_lc3_preset lc3_preset_sink_16_2_1 =
+	BT_BAP_LC3_UNICAST_PRESET_16_2_1(BT_AUDIO_LOCATION_ANY, (BT_AUDIO_CONTEXT_TYPE_MEDIA));
+
 static struct bt_bap_lc3_preset lc3_preset_source = BT_BAP_LC3_UNICAST_PRESET_NRF5340_AUDIO_SOURCE;
+static struct bt_bap_lc3_preset lc3_preset_source_48_4_1 =
+	BT_BAP_LC3_UNICAST_PRESET_48_4_1(BT_AUDIO_LOCATION_ANY, BT_AUDIO_CONTEXT_TYPE_MEDIA);
+static struct bt_bap_lc3_preset lc3_preset_source_24_2_1 =
+	BT_BAP_LC3_UNICAST_PRESET_24_2_1(BT_AUDIO_LOCATION_ANY, BT_AUDIO_CONTEXT_TYPE_MEDIA);
+static struct bt_bap_lc3_preset lc3_preset_source_16_2_1 =
+	BT_BAP_LC3_UNICAST_PRESET_16_2_1(BT_AUDIO_LOCATION_ANY, BT_AUDIO_CONTEXT_TYPE_MEDIA);
 
 static bool playing_state = true;
 
@@ -306,17 +319,146 @@ static int channel_index_get(const struct bt_conn *conn, uint8_t *index)
 	return -EINVAL;
 }
 
-static bool parse_cb(struct bt_data *data, void *user_data)
+static void supported_sample_rates_print(uint16_t supported_sample_rates, enum bt_audio_dir dir)
+{
+	char supported_str[20] = "";
+
+	if (supported_sample_rates & BT_AUDIO_CODEC_LC3_FREQ_48KHZ) {
+		strcat(supported_str, "48, ");
+	}
+
+	if (supported_sample_rates & BT_AUDIO_CODEC_LC3_FREQ_24KHZ) {
+		strcat(supported_str, "24, ");
+	}
+
+	if (supported_sample_rates & BT_AUDIO_CODEC_LC3_FREQ_16KHZ) {
+		strcat(supported_str, "16, ");
+	}
+
+	if (dir == BT_AUDIO_DIR_SINK) {
+		LOG_DBG("Headset supports: %s kHz in sink direction", supported_str);
+	} else if (dir == BT_AUDIO_DIR_SOURCE) {
+		LOG_DBG("Headset supports: %s kHz in source direction", supported_str);
+	}
+}
+
+static bool sink_parse_cb(struct bt_data *data, void *user_data)
 {
 	if (data->type == BT_AUDIO_CODEC_LC3_FREQ) {
 		uint16_t temp = sys_get_le16(data->data);
 
-		if (temp & BT_AUDIO_CODEC_CAPABILIY_FREQ) {
+		supported_sample_rates_print(temp, BT_AUDIO_DIR_SINK);
+
+		/* Try with the preferred sample rate first */
+		switch (CONFIG_BT_AUDIO_PREF_SAMPLE_RATE_VALUE) {
+		case BT_AUDIO_CODEC_CONFIG_LC3_FREQ_48KHZ:
+			if (temp & BT_AUDIO_CODEC_LC3_FREQ_48KHZ) {
+				lc3_preset_sink = lc3_preset_sink_48_4_1;
+				*(bool *)user_data = true;
+				/* Found what we were looking for, stop parsing LTV */
+				return false;
+			}
+
+			break;
+
+		case BT_AUDIO_CODEC_CONFIG_LC3_FREQ_24KHZ:
+			if (temp & BT_AUDIO_CODEC_LC3_FREQ_24KHZ) {
+				lc3_preset_sink = lc3_preset_sink_24_2_1;
+				*(bool *)user_data = true;
+				/* Found what we were looking for, stop parsing LTV */
+				return false;
+			}
+
+			break;
+
+		case BT_AUDIO_CODEC_CONFIG_LC3_FREQ_16KHZ:
+			if (temp & BT_AUDIO_CODEC_LC3_FREQ_16KHZ) {
+				lc3_preset_sink = lc3_preset_sink_16_2_1;
+				*(bool *)user_data = true;
+				/* Found what we were looking for, stop parsing LTV */
+				return false;
+			}
+
+			break;
+		}
+
+		/* If no match with the preferred, revert to trying highest first */
+		if (temp & BT_AUDIO_CODEC_LC3_FREQ_48KHZ) {
+			lc3_preset_sink = lc3_preset_sink_48_4_1;
+			*(bool *)user_data = true;
+		} else if (temp & BT_AUDIO_CODEC_LC3_FREQ_24KHZ) {
+			lc3_preset_sink = lc3_preset_sink_24_2_1;
+			*(bool *)user_data = true;
+		} else if (temp & BT_AUDIO_CODEC_LC3_FREQ_16KHZ) {
+			lc3_preset_sink = lc3_preset_sink_16_2_1;
 			*(bool *)user_data = true;
 		}
+
+		/* Found what we were looking for, stop parsing LTV */
 		return false;
 	}
 
+	/* Did not find what we were looking for, continue parsing LTV */
+	return true;
+}
+
+static bool source_parse_cb(struct bt_data *data, void *user_data)
+{
+	if (data->type == BT_AUDIO_CODEC_LC3_FREQ) {
+		uint16_t temp = sys_get_le16(data->data);
+
+		supported_sample_rates_print(temp, BT_AUDIO_DIR_SOURCE);
+
+		/* Try with the preferred sample rate first */
+		switch (CONFIG_BT_AUDIO_PREF_SAMPLE_RATE_VALUE) {
+		case BT_AUDIO_CODEC_CONFIG_LC3_FREQ_48KHZ:
+			if (temp & BT_AUDIO_CODEC_LC3_FREQ_48KHZ) {
+				lc3_preset_source = lc3_preset_source_48_4_1;
+				*(bool *)user_data = true;
+				/* Found what we were looking for, stop parsing LTV */
+				return false;
+			}
+
+			break;
+
+		case BT_AUDIO_CODEC_CONFIG_LC3_FREQ_24KHZ:
+			if (temp & BT_AUDIO_CODEC_LC3_FREQ_24KHZ) {
+				lc3_preset_source = lc3_preset_source_24_2_1;
+				*(bool *)user_data = true;
+				/* Found what we were looking for, stop parsing LTV */
+				return false;
+			}
+
+			break;
+
+		case BT_AUDIO_CODEC_CONFIG_LC3_FREQ_16KHZ:
+			if (temp & BT_AUDIO_CODEC_LC3_FREQ_16KHZ) {
+				lc3_preset_source = lc3_preset_source_16_2_1;
+				*(bool *)user_data = true;
+				/* Found what we were looking for, stop parsing LTV */
+				return false;
+			}
+
+			break;
+		}
+
+		/* If no match with the preferred, revert to trying highest first */
+		if (temp & BT_AUDIO_CODEC_LC3_FREQ_48KHZ) {
+			lc3_preset_source = lc3_preset_source_48_4_1;
+			*(bool *)user_data = true;
+		} else if (temp & BT_AUDIO_CODEC_LC3_FREQ_24KHZ) {
+			lc3_preset_source = lc3_preset_source_24_2_1;
+			*(bool *)user_data = true;
+		} else if (temp & BT_AUDIO_CODEC_LC3_FREQ_16KHZ) {
+			lc3_preset_source = lc3_preset_source_16_2_1;
+			*(bool *)user_data = true;
+		}
+
+		/* Found what we were looking for, stop parsing LTV */
+		return false;
+	}
+
+	/* Did not find what we were looking for, continue parsing LTV */
 	return true;
 }
 
@@ -325,19 +467,28 @@ static bool parse_cb(struct bt_data *data, void *user_data)
  *
  * @note	Currently only the sampling frequency is checked.
  *
- * @param	cap_array	The array of pointers to codec capabilities.
- * @param	num_caps	The size of cap_array.
+ * @param[in]	cap_array	The array of pointers to codec capabilities.
+ * @param[in]	num_caps	The size of cap_array.
+ * @param[in]	dir		Direction of the capabilities to check.
  *
  * @return	True if valid codec capability found, false otherwise.
  */
-static bool valid_codec_cap_check(struct bt_audio_codec_cap cap_array[], uint8_t num_caps)
+static bool valid_codec_cap_check(struct bt_audio_codec_cap cap_array[], uint8_t num_caps,
+				  enum bt_audio_dir dir)
 {
 	bool valid_result = false;
 
 	/* Only the sampling frequency is checked */
-	for (int i = 0; i < num_caps; i++) {
-		(void)bt_audio_data_parse(cap_array[i].data, cap_array[i].data_len, parse_cb,
-					  &valid_result);
+	if (dir == BT_AUDIO_DIR_SINK) {
+		for (int i = 0; i < num_caps; i++) {
+			(void)bt_audio_data_parse(cap_array[i].data, cap_array[i].data_len,
+						  sink_parse_cb, &valid_result);
+		}
+	} else if (dir == BT_AUDIO_DIR_SOURCE) {
+		for (int i = 0; i < num_caps; i++) {
+			(void)bt_audio_data_parse(cap_array[i].data, cap_array[i].data_len,
+						  source_parse_cb, &valid_result);
+		}
 	}
 
 	return valid_result;
@@ -529,8 +680,8 @@ static void endpoint_cb(struct bt_conn *conn, enum bt_audio_dir dir, struct bt_b
 	if (dir == BT_AUDIO_DIR_SINK) {
 		if (ep != NULL) {
 			if (headsets[channel_index].num_sink_eps > 0) {
-				LOG_WRN("More than one sink endpoint found, idx 0 is used by "
-					"default");
+				LOG_WRN("More than one sink endpoint found, idx 0 is used "
+					"by default");
 				return;
 			}
 
@@ -547,8 +698,8 @@ static void endpoint_cb(struct bt_conn *conn, enum bt_audio_dir dir, struct bt_b
 	} else if (dir == BT_AUDIO_DIR_SOURCE) {
 		if (ep != NULL) {
 			if (headsets[channel_index].num_source_eps > 0) {
-				LOG_WRN("More than one source endpoint found, idx 0 is used by "
-					"default");
+				LOG_WRN("More than one source endpoint found, idx 0 is "
+					"used by default");
 				return;
 			}
 
@@ -587,9 +738,9 @@ static void discover_cb(struct bt_conn *conn, int err, enum bt_audio_dir dir)
 			LOG_WRN("No sources found");
 			headsets[channel_index].waiting_for_source_disc = false;
 			/**
-			 * We usually wait until both sink and source has been discovered before
-			 * configuring, but since no source was found and we have a sink, we need
-			 * to configure that.
+			 * We usually wait until both sink and source has been discovered
+			 * before configuring, but since no source was found and we have a
+			 * sink, we need to configure that.
 			 */
 			if (headsets[channel_index].sink_ep != NULL) {
 				ret = bt_bap_stream_config(conn,
@@ -628,7 +779,7 @@ static void discover_cb(struct bt_conn *conn, int err, enum bt_audio_dir dir)
 
 	if (dir == BT_AUDIO_DIR_SINK) {
 		if (valid_codec_cap_check(headsets[channel_index].sink_codec_cap,
-					  temp_cap[temp_cap_index].num_caps)) {
+					  temp_cap[temp_cap_index].num_caps, BT_AUDIO_DIR_SINK)) {
 			if (conn == headsets[AUDIO_CH_L].headset_conn) {
 				bt_audio_codec_allocation_set(&lc3_preset_sink.codec_cfg,
 							      BT_AUDIO_LOCATION_FRONT_LEFT);
@@ -646,7 +797,7 @@ static void discover_cb(struct bt_conn *conn, int err, enum bt_audio_dir dir)
 		}
 	} else if (dir == BT_AUDIO_DIR_SOURCE) {
 		if (valid_codec_cap_check(headsets[channel_index].source_codec_cap,
-					  temp_cap[temp_cap_index].num_caps)) {
+					  temp_cap[temp_cap_index].num_caps, BT_AUDIO_DIR_SOURCE)) {
 			if (conn == headsets[AUDIO_CH_L].headset_conn) {
 				bt_audio_codec_allocation_set(&lc3_preset_source.codec_cfg,
 							      BT_AUDIO_LOCATION_FRONT_LEFT);
@@ -781,7 +932,9 @@ static void stream_configured_cb(struct bt_bap_stream *stream,
 		headsets[channel_index].sink_stream.qos->pd = new_pres_dly_us;
 	}
 
-	/* Make sure both sink and source ep (if both are discovered) are configured before QoS */
+	/* Make sure both sink and source ep (if both are discovered) are configured before
+	 * QoS
+	 */
 	if ((headsets[channel_index].sink_ep != NULL &&
 	     !le_audio_ep_state_check(headsets[channel_index].sink_stream.ep,
 				      BT_BAP_EP_STATE_CODEC_CONFIGURED)) ||
@@ -795,6 +948,8 @@ static void stream_configured_cb(struct bt_bap_stream *stream,
 	if (ret) {
 		LOG_ERR("QoS not set for %s headset: %d", headsets[channel_index].ch_name, ret);
 	}
+
+	le_audio_event_publish(LE_AUDIO_EVT_CONFIG_RECEIVED, stream->conn, stream->ep->dir);
 }
 
 static void stream_qos_set_cb(struct bt_bap_stream *stream)
@@ -1119,6 +1274,80 @@ static void disconnected_headset_cleanup(uint8_t chan_idx)
 
 	headsets[chan_idx].num_sink_eps = 0;
 	headsets[chan_idx].num_source_eps = 0;
+}
+
+int unicast_client_config_get(struct bt_conn *conn, enum bt_audio_dir dir, uint32_t *bitrate,
+			      uint32_t *sampling_rate_hz)
+{
+	int ret;
+	uint8_t headset_idx;
+
+	if (conn == NULL) {
+		LOG_ERR("No valid connection pointer received");
+		return -EINVAL;
+	}
+
+	if (bitrate == NULL && sampling_rate_hz == NULL) {
+		LOG_ERR("No valid pointers received");
+		return -ENXIO;
+	}
+
+	ret = channel_index_get(conn, &headset_idx);
+	if (ret) {
+		LOG_WRN("No configured streams found");
+		return ret;
+	}
+
+	if (dir == BT_AUDIO_DIR_SINK) {
+		if (headsets[headset_idx].sink_stream.codec_cfg == NULL) {
+			LOG_ERR("No codec found for the stream");
+
+			return -ENXIO;
+		}
+
+		if (sampling_rate_hz != NULL) {
+			ret = le_audio_freq_hz_get(headsets[headset_idx].sink_stream.codec_cfg,
+						   sampling_rate_hz);
+			if (ret) {
+				LOG_ERR("Invalid sampling frequency: %d", ret);
+				return -ENXIO;
+			}
+		}
+
+		if (bitrate != NULL) {
+			ret = le_audio_bitrate_get(headsets[headset_idx].sink_stream.codec_cfg,
+						   bitrate);
+			if (ret) {
+				LOG_ERR("Unable to calculate bitrate: %d", ret);
+				return -ENXIO;
+			}
+		}
+	} else if (dir == BT_AUDIO_DIR_SOURCE) {
+		if (headsets[headset_idx].source_stream.codec_cfg == NULL) {
+			LOG_ERR("No codec found for the stream");
+			return -ENXIO;
+		}
+
+		if (sampling_rate_hz != NULL) {
+			ret = le_audio_freq_hz_get(headsets[headset_idx].source_stream.codec_cfg,
+						   sampling_rate_hz);
+			if (ret) {
+				LOG_ERR("Invalid sampling frequency: %d", ret);
+				return -ENXIO;
+			}
+		}
+
+		if (bitrate != NULL) {
+			ret = le_audio_bitrate_get(headsets[headset_idx].source_stream.codec_cfg,
+						   bitrate);
+			if (ret) {
+				LOG_ERR("Unable to calculate bitrate: %d", ret);
+				return -ENXIO;
+			}
+		}
+	}
+
+	return 0;
 }
 
 void unicast_client_conn_disconnected(struct bt_conn *conn)

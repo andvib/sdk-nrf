@@ -48,6 +48,7 @@ struct sw_codec_encoder {
 	enum sw_codec_channel_mode channel_mode;
 	uint8_t num_ch;
 	enum audio_channel audio_ch;
+	int sample_rate_hz;
 };
 
 struct sw_codec_decoder {
@@ -56,6 +57,7 @@ struct sw_codec_decoder {
 	enum sw_codec_channel_mode channel_mode; /* Mono or stereo. */
 	uint8_t num_ch;				 /* Number of decoder channels. */
 	enum audio_channel audio_ch;		 /* Used to choose which channel to use. */
+	int sample_rate_hz;
 };
 
 /**

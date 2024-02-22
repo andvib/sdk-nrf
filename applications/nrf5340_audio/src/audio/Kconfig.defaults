@@ -11,3 +11,8 @@ config NRFX_TIMER1
 # Audio sync timer
 config NRFX_DPPI
 	default y
+
+if AUDIO_SAMPLE_RATE_CONVERSION
+	config SAMPLE_RATE_CONVERTER_BLOCK_SIZE_MAX
+		default 960
+endif
