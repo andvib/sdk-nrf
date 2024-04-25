@@ -117,8 +117,6 @@ int nrf5340_audio_dk_init(void)
 		return ret;
 	}
 
-	channel_assignment_init();
-
 	ret = channel_assign_check();
 	if (ret) {
 		LOG_ERR("Failed get channel assignment");
@@ -155,12 +153,6 @@ int nrf5340_audio_dk_init(void)
 			LOG_ERR("Failed to initialize SD card playback");
 			return ret;
 		}
-	}
-
-	ret = audio_system_init();
-	if (ret) {
-		LOG_ERR("Failed to initialize the audio system");
-		return ret;
 	}
 
 	return 0;

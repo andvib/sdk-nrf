@@ -13,6 +13,7 @@
 #include "nrf5340_audio_common.h"
 #include "nrf5340_audio_dk.h"
 #include "broadcast_source.h"
+#include "channel_assignment.h"
 #include "led.h"
 #include "button_assignments.h"
 #include "macros_common.h"
@@ -320,8 +321,18 @@ int main(void)
 
 	LOG_DBG("nRF5340 APP core started");
 
-	ret = nrf5340_audio_dk_init();
-	ERR_CHK(ret);
+	channel_assignment_init();
+
+	if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+		ret = nrf5340_audio_dk_init();
+		ERR_CHK(ret);
+	}
+
+	ret = audio_system_init();
+	if (ret) {
+		LOG_ERR("Failed to initialize the audio system");
+		return ret;
+	}
 
 	ret = nrf5340_audio_common_init();
 	ERR_CHK(ret);
