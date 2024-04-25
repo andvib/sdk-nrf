@@ -16,6 +16,7 @@
 #include "channel_assignment.h"
 #include "led.h"
 #include "button_assignments.h"
+#include "button_handler.h"
 #include "macros_common.h"
 #include "audio_system.h"
 #include "bt_mgmt.h"
@@ -328,11 +329,11 @@ int main(void)
 		ERR_CHK(ret);
 	}
 
+	ret = button_handler_init();
+	ERR_CHK_MSG(ret, "Failed to initialize button handler");
+
 	ret = audio_system_init();
-	if (ret) {
-		LOG_ERR("Failed to initialize the audio system");
-		return ret;
-	}
+	ERR_CHK_MSG(ret, "Failed to initialize the audio system");
 
 	ret = nrf5340_audio_common_init();
 	ERR_CHK(ret);

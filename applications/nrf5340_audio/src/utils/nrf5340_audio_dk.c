@@ -111,12 +111,6 @@ int nrf5340_audio_dk_init(void)
 		return ret;
 	}
 
-	ret = button_handler_init();
-	if (ret) {
-		LOG_ERR("Failed to initialize button handler");
-		return ret;
-	}
-
 	ret = channel_assign_check();
 	if (ret) {
 		LOG_ERR("Failed get channel assignment");
