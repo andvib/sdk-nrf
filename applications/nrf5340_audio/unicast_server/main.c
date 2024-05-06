@@ -506,13 +506,13 @@ int main(void)
 
 	channel_assignment_init();
 
+	ret = button_handler_init();
+	ERR_CHK_MSG(ret, "Failed to initialize button handler");
+
 	if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
 		ret = nrf5340_audio_dk_init();
 		ERR_CHK(ret);
 	}
-
-	ret = button_handler_init();
-	ERR_CHK_MSG(ret, "Failed to initialize button handler");
 
 	ret = audio_system_init();
 	ERR_CHK_MSG(ret, "Failed to initialize the audio system");
