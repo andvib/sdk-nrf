@@ -23,6 +23,7 @@
 #include "bt_content_ctrl.h"
 #include "unicast_client.h"
 #include "le_audio_rx.h"
+#include "nrfx_clock.h"
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(main, CONFIG_MAIN_LOG_LEVEL);
@@ -235,8 +236,10 @@ static void le_audio_msg_sub_thread(void)
 			audio_system_start();
 			stream_state_set(STATE_STREAMING);
 
-			ret = led_blink(LED_APP_1_BLUE);
-			ERR_CHK(ret);
+			if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+				ret = led_blink(LED_APP_1_BLUE);
+				ERR_CHK(ret);
+			}
 			break;
 
 		case LE_AUDIO_EVT_NOT_STREAMING:
@@ -254,12 +257,15 @@ static void le_audio_msg_sub_thread(void)
 			stream_state_set(STATE_PAUSED);
 			audio_system_stop();
 
-			ret = led_on(LED_APP_1_BLUE);
-			ERR_CHK(ret);
+			if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+				ret = led_on(LED_APP_1_BLUE);
+				ERR_CHK(ret);
+			}
 			break;
 
 		case LE_AUDIO_EVT_NO_VALID_CFG:
-			LOG_WRN("No valid configurations found or CIS establishment failed, will "
+			LOG_WRN("No valid configurations found or CIS establishment "
+				"failed, will "
 				"disconnect");
 
 			ret = bt_mgmt_conn_disconnect(msg.conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);

@@ -199,8 +199,11 @@ static void le_audio_msg_sub_thread(void)
 
 			audio_system_start();
 			stream_state_set(STATE_STREAMING);
-			ret = led_blink(LED_APP_1_BLUE);
-			ERR_CHK(ret);
+
+			if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+				ret = led_blink(LED_APP_1_BLUE);
+				ERR_CHK(ret);
+			}
 
 			break;
 
@@ -218,8 +221,11 @@ static void le_audio_msg_sub_thread(void)
 
 			stream_state_set(STATE_PAUSED);
 			audio_system_stop();
-			ret = led_on(LED_APP_1_BLUE);
-			ERR_CHK(ret);
+
+			if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+				ret = led_on(LED_APP_1_BLUE);
+				ERR_CHK(ret);
+			}
 
 			break;
 

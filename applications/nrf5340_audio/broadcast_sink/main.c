@@ -203,8 +203,11 @@ static void le_audio_msg_sub_thread(void)
 
 			audio_system_start();
 			stream_state_set(STATE_STREAMING);
-			ret = led_blink(LED_APP_1_BLUE);
-			ERR_CHK(ret);
+
+			if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+				ret = led_blink(LED_APP_1_BLUE);
+				ERR_CHK(ret);
+			}
 
 			break;
 
@@ -218,8 +221,11 @@ static void le_audio_msg_sub_thread(void)
 
 			stream_state_set(STATE_PAUSED);
 			audio_system_stop();
-			ret = led_on(LED_APP_1_BLUE);
-			ERR_CHK(ret);
+
+			if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+				ret = led_on(LED_APP_1_BLUE);
+				ERR_CHK(ret);
+			}
 
 			break;
 
@@ -455,13 +461,13 @@ int main(void)
 
 	channel_assignment_init();
 
+	ret = button_handler_init();
+	ERR_CHK_MSG(ret, "Failed to initialize button handler");
+
 	if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
 		ret = nrf5340_audio_dk_init();
 		ERR_CHK(ret);
 	}
-
-	ret = button_handler_init();
-	ERR_CHK_MSG(ret, "Failed to initialize button handler");
 
 	ret = audio_system_init();
 	ERR_CHK_MSG(ret, "Failed to initialize the audio system");
