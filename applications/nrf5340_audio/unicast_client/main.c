@@ -12,6 +12,8 @@
 #include "nrf5340_audio_dk.h"
 #include "led.h"
 #include "button_assignments.h"
+#include "button_handler.h"
+#include "channel_assignment.h"
 #include "macros_common.h"
 #include "audio_system.h"
 #include "button_handler.h"
@@ -233,8 +235,10 @@ static void le_audio_msg_sub_thread(void)
 			audio_system_start();
 			stream_state_set(STATE_STREAMING);
 
-			ret = led_blink(LED_APP_1_BLUE);
-			ERR_CHK(ret);
+			if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+				ret = led_blink(LED_APP_1_BLUE);
+				ERR_CHK(ret);
+			}
 			break;
 
 		case LE_AUDIO_EVT_NOT_STREAMING:
@@ -252,12 +256,15 @@ static void le_audio_msg_sub_thread(void)
 			stream_state_set(STATE_PAUSED);
 			audio_system_stop();
 
-			ret = led_on(LED_APP_1_BLUE);
-			ERR_CHK(ret);
+			if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+				ret = led_on(LED_APP_1_BLUE);
+				ERR_CHK(ret);
+			}
 			break;
 
 		case LE_AUDIO_EVT_NO_VALID_CFG:
-			LOG_WRN("No valid configurations found or CIS establishment failed, will "
+			LOG_WRN("No valid configurations found or CIS establishment "
+				"failed, will "
 				"disconnect");
 
 			ret = bt_mgmt_conn_disconnect(msg.conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
@@ -473,8 +480,18 @@ int main(void)
 
 	LOG_DBG("nRF5340 APP core started");
 
-	ret = nrf5340_audio_dk_init();
-	ERR_CHK(ret);
+	channel_assignment_init();
+
+	if (IS_ENABLED(CONFIG_BOARD_NRF5340_AUDIO_DK_NRF5340_CPUAPP)) {
+		ret = nrf5340_audio_dk_init();
+		ERR_CHK(ret);
+	}
+
+	ret = button_handler_init();
+	ERR_CHK_MSG(ret, "Failed to initialize button handler");
+
+	ret = audio_system_init();
+	ERR_CHK_MSG(ret, "Failed to initialize the audio system");
 
 	ret = nrf5340_audio_common_init();
 	ERR_CHK(ret);

@@ -6,6 +6,7 @@
 
 #include "bt_mgmt.h"
 #include "fw_info_app.h"
+#include "nrfx_clock.h"
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(nrf5340_audio_common, CONFIG_NRF5340_AUDIO_COMMON_LOG_LEVEL);
@@ -23,6 +24,13 @@ int nrf5340_audio_common_init(void)
 	ret = bt_mgmt_init();
 	if (ret) {
 		LOG_ERR("Failed to initialize bt_mgmt");
+		return ret;
+	}
+
+	/* Use this to turn on 128 MHz clock for cpu_app */
+	ret = nrfx_clock_divider_set(NRF_CLOCK_DOMAIN_HFCLK, NRF_CLOCK_HFCLK_DIV_1);
+	ret -= NRFX_ERROR_BASE_NUM;
+	if (ret) {
 		return ret;
 	}
 

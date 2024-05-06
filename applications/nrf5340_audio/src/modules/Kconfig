@@ -18,7 +18,12 @@ config AUDIO_SYNC_TIMER_USES_RTC
 	select NRFX_RTC0
 
 #----------------------------------------------------------------------------#
-menu "Power measurement"
+menuconfig NRF5340_AUDIO_POWER_MEASURMENT
+	bool "Power measurement"
+	help
+	  Include the power measurment driver for the nRF5340 Audio DK
+
+if NRF5340_AUDIO_POWER_MEASURMENT
 
 config POWER_MEAS_INTERVAL_MS
 	int "Power measurement interval in milliseconds"
@@ -36,7 +41,7 @@ config POWER_MEAS_START_ON_BOOT
 	  the voltage, current consumption, and power usage for the
 	  following rails: VBAT, VDD1_CODEC, VDD2_CODEC, and VDD2_NRF
 
-endmenu # Power measurement
+endif # NRF5340_AUDIO_POWER_MEASURMENT
 
 #----------------------------------------------------------------------------#
 menu "I2S"
