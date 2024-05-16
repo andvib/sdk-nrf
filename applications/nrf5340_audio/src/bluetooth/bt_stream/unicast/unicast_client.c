@@ -769,10 +769,17 @@ static void discover_cb(struct bt_conn *conn, int err, enum bt_audio_dir dir)
 	uint8_t channel_index;
 	uint8_t temp_cap_index;
 
+	LOG_ERR("Discover cb!");
+
 	ret = channel_index_get(conn, &channel_index);
 	if (ret) {
 		LOG_ERR("Unknown connection, should not reach here");
 		return;
+	}
+
+	ret = bt_cap_initiator_unicast_discover(conn);
+	if (ret) {
+		LOG_ERR("This didn't go as expected");
 	}
 
 	if (err == BT_ATT_ERR_ATTRIBUTE_NOT_FOUND) {
@@ -1552,6 +1559,35 @@ int unicast_client_disable(void)
 	return -ENOTSUP;
 }
 
+void cap_initiator_discovery_complete(struct bt_conn *conn, int err,
+				      const struct bt_csip_set_coordinator_set_member *member,
+				      const struct bt_csip_set_coordinator_csis_inst *csis_int)
+{
+	LOG_ERR("cap_initiator_discovery_complete()");
+}
+
+void cap_initiator_start_complete(int err, struct bt_conn *conn)
+{
+	LOG_ERR("cap_initiator_start_complete()");
+}
+
+void cap_initiator_update_complete(int err, struct bt_conn *conn)
+{
+	LOG_ERR("cap_initiator_update_complete()");
+}
+
+void cap_initiator_stop_complete(int err, struct bt_conn *conn)
+{
+	LOG_ERR("cap_initiator_stop_complete()");
+}
+
+struct bt_cap_initiator_cb cap_initiatior_cbs = {
+	.unicast_discovery_complete = cap_initiator_discovery_complete,
+	.unicast_start_complete = cap_initiator_start_complete,
+	.unicast_update_complete = cap_initiator_update_complete,
+	.unicast_stop_complete = cap_initiator_stop_complete,
+};
+
 int unicast_client_enable(le_audio_receive_cb recv_cb)
 {
 	int ret;
@@ -1588,6 +1624,11 @@ int unicast_client_enable(le_audio_receive_cb recv_cb)
 	if (ret != 0) {
 		LOG_ERR("Failed to register client callbacks: %d", ret);
 		return ret;
+	}
+
+	ret = bt_cap_initiator_register_cb(&cap_initiatior_cbs);
+	if (ret) {
+		LOG_ERR("failed to register initiator cbs: %d", ret);
 	}
 
 	if (IS_ENABLED(CONFIG_BT_AUDIO_TX)) {

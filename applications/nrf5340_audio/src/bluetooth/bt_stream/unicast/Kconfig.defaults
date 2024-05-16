@@ -7,6 +7,15 @@
 config BT_GATT_CLIENT
 	default y
 
+config BT_CAP_INITIATOR
+	default y
+
+config BT_CAP_COMMANDER
+	default y
+
+config BT_CSIP_SET_COORDINATOR
+	default y
+
 config BT_BONDABLE
 	default y
 
