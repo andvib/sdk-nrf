@@ -4,14 +4,10 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-menu "DFU"
-
-#----------------------------------------------------------------------------#
-menu "Log level"
+if AUDIO_BT_MGMT_DFU
 
 module = BT_MGMT_DFU
 module-str = bt-mgmt-dfu
 source "subsys/logging/Kconfig.template.log_config"
 
-endmenu # Log level
-endmenu # DFU
+endif # AUDIO_BT_MGMT_DFU

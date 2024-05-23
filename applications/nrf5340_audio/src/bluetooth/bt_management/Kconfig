@@ -28,6 +28,15 @@ config CTLR_POLL_WORK_Q_PRIO
 
 endmenu # Thread priorities
 
+menuconfig AUDIO_BT_MGMT_DFU
+	bool "Enable BT MGMT DFU module"
+	default n
+	select EXPERIMENTAL
+	select BT_DEVICE_NAME_DYNAMIC
+	help
+	  Enable the BT MGMT module. This module adds the DFU mode
+	  that can be entered from the main application.
+
 rsource "dfu/Kconfig"
 rsource "advertising/Kconfig"
 rsource "scanning/Kconfig"

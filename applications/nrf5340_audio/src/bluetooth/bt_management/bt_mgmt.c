@@ -19,10 +19,7 @@
 #include "button_assignments.h"
 #include "bt_mgmt_ctlr_cfg_internal.h"
 #include "bt_mgmt_adv_internal.h"
-
-#if defined(CONFIG_AUDIO_DFU_ENABLE)
 #include "bt_mgmt_dfu_internal.h"
-#endif
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(bt_mgmt, CONFIG_BT_MGMT_LOG_LEVEL);
@@ -428,7 +425,7 @@ int bt_mgmt_init(void)
 		}
 	}
 
-#if defined(CONFIG_AUDIO_DFU_ENABLE)
+#if defined(CONFIG_AUDIO_BT_MGMT_DFU)
 	bool pressed;
 
 	ret = button_pressed(BUTTON_4, &pressed);
