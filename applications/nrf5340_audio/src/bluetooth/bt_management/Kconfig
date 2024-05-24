@@ -32,6 +32,7 @@ menuconfig AUDIO_BT_MGMT_DFU
 	bool "Enable BT MGMT DFU module"
 	default n
 	select EXPERIMENTAL
+	select NCS_SAMPLE_MCUMGR_BT_OTA_DFU
 	select BT_DEVICE_NAME_DYNAMIC
 	help
 	  Enable the BT MGMT module. This module adds the DFU mode
