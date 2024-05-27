@@ -4,7 +4,26 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-source "${ZEPHYR_BASE}/share/sysbuild/Kconfig"
+#choice BOOTLOADER
+#	default BOOTLOADER_MCUBOOT
+#endchoice
 
 config NRF_DEFAULT_BLUETOOTH
 	default y
+
+config SECURE_BOOT
+	default y
+
+config SECURE_BOOT_NETCORE
+	default y
+
+config NETCORE_APP_UPDATE
+	default y
+
+config PM_EXTERNAL_FLASH_MCUBOOT_SECONDARY
+	default y
+
+config PM_OVERRIDE_EXTERNAL_DRIVER_CHECK
+	default y
+
+source "${ZEPHYR_BASE}/share/sysbuild/Kconfig"
