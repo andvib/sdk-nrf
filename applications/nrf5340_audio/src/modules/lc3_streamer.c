@@ -8,6 +8,8 @@
 #include "lc3_file.h"
 #include "data_fifo.h"
 
+#include <zephyr/timing/timing.h>
+
 #include <errno.h>
 #include <zephyr/kernel.h>
 
@@ -103,11 +105,19 @@ static int put_next_frame_to_fifo(struct lc3_stream *stream)
 	int ret;
 	char *data_ptr;
 
+	timing_t start_time, end_time;
+	uint64_t total_cycles;
+	uint64_t total_ns;
+	timing_init();
+
 	ret = data_fifo_pointer_first_vacant_get(&stream->fifo, (void **)&data_ptr, K_NO_WAIT);
 	if (ret) {
 		LOG_ERR("Failed to get first vacant block %d", ret);
 		return ret;
 	}
+
+	timing_start();
+	start_time = timing_counter_get();
 
 	/* Get next frame from file */
 	ret = lc3_file_frame_get(&stream->file, data_ptr,
@@ -117,6 +127,14 @@ static int put_next_frame_to_fifo(struct lc3_stream *stream)
 		data_fifo_block_free(&stream->fifo, (void *)data_ptr);
 		return ret;
 	}
+
+	end_time = timing_counter_get();
+	total_cycles = timing_cycles_get(&start_time, &end_time);
+	total_ns = timing_cycles_to_ns(total_cycles);
+
+	LOG_ERR("Fetching frame took: %llu ns", total_ns);
+
+	timing_stop();
 
 	ret = data_fifo_block_lock(&stream->fifo, (void **)&data_ptr,
 				   CONFIG_SD_CARD_LC3_STREAMER_MAX_FRAME_SIZE);
@@ -180,6 +198,13 @@ static void load_next_frame(struct k_work *work)
 	int ret;
 	struct lc3_stream *stream = CONTAINER_OF(work, struct lc3_stream, work);
 
+	timing_t start_time, end_time;
+	uint64_t total_cycles;
+	uint64_t total_ns;
+	timing_init();
+	timing_start();
+	start_time = timing_counter_get();
+
 	ret = put_next_frame_to_fifo(stream);
 	if (ret == -ENODATA) {
 		LOG_ERR("End of stream");
@@ -190,6 +215,7 @@ static void load_next_frame(struct k_work *work)
 				LOG_ERR("Failed to loop stream %d", ret);
 				stream->state = STREAM_ENDED;
 			}
+
 		} else {
 			stream->state = STREAM_PLAYING_LAST_FRAME;
 		}
@@ -197,8 +223,16 @@ static void load_next_frame(struct k_work *work)
 		LOG_ERR("Failed to put next frame to fifo %d", ret);
 		stream->state = STREAM_ENDED;
 	} else {
-		LOG_ERR("Work item executed");
+		// LOG_ERR("Work item executed");
 	}
+
+	end_time = timing_counter_get();
+	total_cycles = timing_cycles_get(&start_time, &end_time);
+	total_ns = timing_cycles_to_ns(total_cycles);
+
+	LOG_ERR("Fetching frame took: %llu ns", total_ns);
+
+	timing_stop();
 }
 
 int lc3_streamer_next_frame_get(int streamer_idx, uint8_t **frame_buffer)
