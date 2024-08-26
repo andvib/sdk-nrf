@@ -21,6 +21,9 @@ add_subdirectory(${ZEPHYR_NRF_MODULE_DIR}/applications/nrf5340_audio/src/bluetoo
 
 target_sources_ifdef(CONFIG_NRF5340_AUDIO_SD_CARD_MODULE app PRIVATE ${ZEPHYR_NRF_MODULE_DIR}/applications/nrf5340_audio/src/modules/sd_card.c)
 
+target_sources(app PRIVATE ${ZEPHYR_NRF_MODULE_DIR}/applications/nrf5340_audio/src/modules/audio_sync_timer.c)
+target_sources(app PRIVATE ${ZEPHYR_NRF_MODULE_DIR}/applications/nrf5340_audio/src/modules/lc3_file.c)
+target_sources(app PRIVATE ${ZEPHYR_NRF_MODULE_DIR}/applications/nrf5340_audio/src/modules/lc3_streamer.c)
 
 FILE(GLOB app_sources src/*.c)
 
