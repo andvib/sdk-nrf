@@ -210,7 +210,7 @@ if NRF5340_AUDIO_SD_CARD_LC3_STREAMER
 
 config SD_CARD_LC3_STREAMER_STACK_SIZE
 	int "Stack size for the SD card LC3 streamer thread"
-	default 1500
+	default 3000
 
 config SD_CARD_LC3_STREAMER_THREAD_PRIORITY
 	int "Priority for the SD card LC3 streamer thread"

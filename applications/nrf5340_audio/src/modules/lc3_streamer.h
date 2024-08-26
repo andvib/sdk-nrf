@@ -56,11 +56,16 @@ int lc3_streamer_stream_register(const char *const filename, uint8_t *const stre
  */
 uint8_t lc3_streamer_num_active_streams(void);
 
+void lc3_streamer_file_path_get(const uint8_t streamer_idx, char *const path,
+				const size_t path_len);
+
+bool lc3_streamer_is_looping(const uint8_t streamer_idx);
+
 /**
  * @brief End a stream that's playing.
  *
- * @details Stops the streamer from playing the stream. Any open contexts will be closed, and any
- * active frame buffers will become invalid.
+ * @details Stops the streamer from playing the stream. Any open contexts will be closed,
+ * and any active frame buffers will become invalid.
  *
  * @param[in]   streamer_idx    Index of the streamer to end.
  *

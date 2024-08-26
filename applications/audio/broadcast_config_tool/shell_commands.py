@@ -37,11 +37,14 @@ def send_shell_command(command, port, sleep_time=0.5, baudrate=9600, timeout=1):
 # print(response)
 
 response = send_shell_command('bct preset 48_4_1 0', '/dev/ttyACM0')
+response = send_shell_command('bct preset 48_4_1 1', '/dev/ttyACM0')
 
 response = send_shell_command('bct num_bises 1 0 0', '/dev/ttyACM0')
+response = send_shell_command('bct num_bises 1 1 0', '/dev/ttyACM0')
 
-response = send_shell_command('bct file_select play_this.lc3 0 0 0', '/dev/ttyACM0')
+response = send_shell_command('bct file select left-channel/generated_lc3/48000hz/left-channel_48kHz_left_96kbps.lc3 0 0 0 1', '/dev/ttyACM0')
+response = send_shell_command('bct file select right-channel/generated_lc3/48000hz/right-channel_48kHz_left_96kbps.lc3 1 0 0 1', '/dev/ttyACM0')
 
-response = send_shell_command('bct start', '/dev/ttyACM0')
+response = send_shell_command('bct start 1 0', '/dev/ttyACM0')
 
-response = send_shell_command('bct send', '/dev/ttyACM0')
+#response = send_shell_command('bct send', '/dev/ttyACM0')

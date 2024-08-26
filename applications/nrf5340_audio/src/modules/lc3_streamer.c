@@ -350,6 +350,36 @@ uint8_t lc3_streamer_num_active_streams(void)
 	return num_active;
 }
 
+void lc3_streamer_file_path_get(const uint8_t streamer_idx, char *const path, const size_t path_len)
+{
+	if (streamer_idx >= ARRAY_SIZE(streams)) {
+		LOG_ERR("Invalid streamer index %d", streamer_idx);
+		return;
+	}
+
+	if (path == NULL) {
+		LOG_ERR("Nullptr received for path");
+		return;
+	}
+
+	if (path_len < strlen(streams[streamer_idx].filename)) {
+		LOG_ERR("Path buffer too small");
+		return;
+	}
+
+	strncpy(path, streams[streamer_idx].filename, path_len);
+}
+
+bool lc3_streamer_is_looping(const uint8_t streamer_idx)
+{
+	if (streamer_idx >= ARRAY_SIZE(streams)) {
+		LOG_ERR("Invalid streamer index %d", streamer_idx);
+		return false;
+	}
+
+	return streams[streamer_idx].loop_stream;
+}
+
 int lc3_streamer_stream_close(const uint8_t streamer_idx)
 {
 	int ret;
