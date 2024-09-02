@@ -228,12 +228,8 @@ static void le_audio_msg_sub_thread(void)
 			LOG_DBG("LE audio evt stream sent for %d.%d.%d", msg.idx.lvl1, msg.idx.lvl2,
 				msg.idx.lvl3);
 
-			if (++sent_count < 2) {
-				// LOG_ERR("Got one channel");
-				break;
-			}
-
-			uint8_t stream_file_idx = lc3_file_idx[msg.idx.lvl1][msg.idx.lvl2][0];
+			uint8_t stream_file_idx =
+				lc3_file_idx[msg.idx.lvl1][msg.idx.lvl2][msg.idx.lvl3];
 
 			if (stream_file_idx == LC3_FILE_INDEX_UNUSED) {
 				LOG_ERR("Stream index is unused");
@@ -258,21 +254,25 @@ static void le_audio_msg_sub_thread(void)
 				break;
 			} else if (ret == -ENOMSG) {
 				LOG_ERR("Use zero packet");
-				memset(&data_frames[msg.idx.lvl3 * 120], 100, 120);
+				memset(&data_frames[msg.idx.lvl3 * 120], 0, 120);
 			} else if (ret) {
 				LOG_ERR("Failed to get next frame: %d", ret);
 				break;
-			} // else {
-			  // LOG_ERR("Acutal data %d", frame_buffer[0]);
-			//	memcpy(&data_frames[msg.idx.lvl3 * 120], frame_buffer, 120);
-			//}
+			} else {
+				LOG_ERR("Acutal data %d", frame_buffer[0]);
+				memcpy(&data_frames[msg.idx.lvl3 * 120], frame_buffer, 120);
+			}
 			LOG_ERR("Copying stream %d, with file idx %d (arr1 %d arr2 %d) (sent count "
 				"is %d)",
 				msg.idx.lvl3, stream_file_idx, data_frames[0], data_frames[120],
 				sent_count);
 
-			memcpy(&data_frames[0], frame_buffer, 120);
-			memcpy(&data_frames[120], frame_buffer, 120);
+			// memcpy(&data_frames[msg.idx.lvl3 * 120], frame_buffer, 120);
+
+			if (++sent_count < 2) {
+				// LOG_ERR("Got one channel");
+				break;
+			}
 
 			// LOG_ERR("Got two channels");
 			sent_count = 0;
