@@ -213,6 +213,10 @@ static void le_audio_msg_sub_thread(void)
 
 	LOG_ERR("Sub thread started");
 
+	static int sent_count = 0;
+
+	static uint8_t data_frames[240];
+
 	while (1) {
 		struct le_audio_msg msg;
 
@@ -224,7 +228,56 @@ static void le_audio_msg_sub_thread(void)
 			LOG_DBG("LE audio evt stream sent for %d.%d.%d", msg.idx.lvl1, msg.idx.lvl2,
 				msg.idx.lvl3);
 
-			stream_get_frame_and_send(msg.idx);
+			if (++sent_count < 2) {
+				// LOG_ERR("Got one channel");
+				break;
+			}
+
+			uint8_t stream_file_idx = lc3_file_idx[msg.idx.lvl1][msg.idx.lvl2][0];
+
+			if (stream_file_idx == LC3_FILE_INDEX_UNUSED) {
+				LOG_ERR("Stream index is unused");
+				break;
+			}
+
+			uint8_t *frame_buffer;
+			int sdu_size = broadcast_param[msg.idx.lvl1]
+					       .subgroups[msg.idx.lvl2]
+					       .group_lc3_preset.qos.sdu;
+
+			ret = lc3_streamer_next_frame_get(stream_file_idx, &frame_buffer);
+			if (ret == -ENODATA) {
+				LOG_DBG("No more frames to read");
+				ret = lc3_streamer_stream_close(stream_file_idx);
+				if (ret) {
+					LOG_ERR("Failed to close stream: %d", ret);
+				}
+
+				lc3_file_idx[msg.idx.lvl1][msg.idx.lvl2][0] = LC3_FILE_INDEX_UNUSED;
+
+				break;
+			} else if (ret == -ENOMSG) {
+				LOG_ERR("Use zero packet");
+				memset(&data_frames[msg.idx.lvl3 * 120], 100, 120);
+			} else if (ret) {
+				LOG_ERR("Failed to get next frame: %d", ret);
+				break;
+			} // else {
+			  // LOG_ERR("Acutal data %d", frame_buffer[0]);
+			//	memcpy(&data_frames[msg.idx.lvl3 * 120], frame_buffer, 120);
+			//}
+			LOG_ERR("Copying stream %d, with file idx %d (arr1 %d arr2 %d) (sent count "
+				"is %d)",
+				msg.idx.lvl3, stream_file_idx, data_frames[0], data_frames[120],
+				sent_count);
+
+			memcpy(&data_frames[0], frame_buffer, 120);
+			memcpy(&data_frames[120], frame_buffer, 120);
+
+			// LOG_ERR("Got two channels");
+			sent_count = 0;
+
+			audio_send(data_frames, sdu_size * 2, 2);
 
 			break;
 
@@ -843,7 +896,9 @@ static int enable_big(const struct shell *shell, uint8_t big_index)
 	for (int i = 0; i < broadcast_param[big_index].num_subgroups; i++) {
 		for (int j = 0; j < broadcast_param[big_index].subgroups[i].num_bises; j++) {
 			LOG_ERR("Starting stream for BIG%d, subgroup %d, BIS %d", big_index, i, j);
-			stream_get_frame_and_send((struct stream_index){big_index, i, j});
+			// stream_get_frame_and_send((struct stream_index){big_index, i, j});
+			static uint8_t zero_packet[120];
+			audio_send(zero_packet, 120, 1);
 		}
 	}
 
@@ -985,7 +1040,7 @@ static int cmd_show(const struct shell *shell, size_t argc, char **argv)
 				if (streamer_idx == LC3_FILE_INDEX_UNUSED) {
 					shell_print(shell, "\t\t\tBIS %d: Not set", k);
 				} else {
-					char file_name[30];
+					char file_name[100];
 					bool looping = lc3_streamer_is_looping(streamer_idx);
 
 					lc3_streamer_file_path_get(streamer_idx, file_name,
